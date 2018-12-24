@@ -3,7 +3,7 @@
 .DS_Store
 /build
 /captures
-
+connection.txt
 ### JetBrains template
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion
 
