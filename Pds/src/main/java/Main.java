@@ -11,9 +11,9 @@ public class Main {
             SQL.run("insert into test values("+i+")");
         }
 
-        SQL.run("select * from test", (r) -> {
+        SQL.run("select * from test", (row) -> {
             try {
-                System.out.println(r.getInt("ID"));
+                System.out.println(row.getInt("ID"));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
