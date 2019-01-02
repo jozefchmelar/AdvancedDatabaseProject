@@ -1,421 +1,339 @@
--- Create user data types section -------------------------------------------------
+/*
+created: 28.12.2018
+modified: 31.12.2018
+model: oracle 11g release 2
+database: oracle 11g release 2
+*/
 
-CREATE TYPE "t_udrzba"
-AS OBJECT (
-  km Number,
-  cena Number,
-  od Date,
-  do Date,
-  popis Varchar2(40)
+
+-- create user data types section -------------------------------------------------
+
+create type t_udrzba
+as object (
+  km number,
+  cena number,
+  od date,
+  do date,
+  popis varchar2(40)
 )
 /
 
-create type "udrzba" as table of "t_udrzba"
-/
--- Create sequences section -------------------------------------------------
---region
-CREATE SEQUENCE "seq_pk_vozidla"
- INCREMENT BY 1
- START WITH 1
- NOMAXVALUE
- NOMINVALUE
- CACHE 20
+create type udrzby
+as table of t_udrzba
 /
 
-CREATE SEQUENCE "seq_pk_osoba"
- INCREMENT BY 1
- START WITH 1
- NOMAXVALUE
- NOMINVALUE
- CACHE 20
+-- create sequences section -------------------------------------------------
+
+create sequence seq_pk_vozidla
+ increment by 1
+ start with 1
+ nomaxvalue
+ nominvalue
+ cache 20
 /
 
-CREATE SEQUENCE "seq_pk_vypozicky"
- INCREMENT BY 1
- START WITH 1
- NOMAXVALUE
- NOMINVALUE
- CACHE 20
+create sequence seq_pk_vypozicky
+ increment by 1
+ start with 1
+ nomaxvalue
+ nominvalue
+ cache 20
 /
 
-CREATE SEQUENCE "seq_pk_udrzba"
- INCREMENT BY 1
- START WITH 1
- NOMAXVALUE
- NOMINVALUE
- CACHE 20
+create sequence seq_pk_udrzba
+ increment by 1
+ start with 1
+ nomaxvalue
+ nominvalue
+ cache 20
 /
 
-CREATE SEQUENCE "seq_pk_cennik"
- INCREMENT BY 1
- START WITH 1
- NOMAXVALUE
- NOMINVALUE
- CACHE 20
+create sequence seq_pk_cennik
+ increment by 1
+ start with 1
+ nomaxvalue
+ nominvalue
+ cache 20
 /
 
-CREATE SEQUENCE "seq_pk_vozidlo_cennik"
- NOMAXVALUE
- NOMINVALUE
- CACHE 20
+create sequence seq_pk_faktury
+ increment by 1
+ start with 1
+ nomaxvalue
+ nominvalue
+ cache 20
 /
 
-CREATE SEQUENCE "seq_pk_faktury"
- INCREMENT BY 1
- START WITH 1
- NOMAXVALUE
- NOMINVALUE
- CACHE 20
-/
---endregion
--- Create tables section -------------------------------------------------
+-- create tables section -------------------------------------------------
 
--- Table vozidla
+-- table vozidlo
 
-CREATE TABLE "vozidla"(
-  "id" Integer NOT NULL,
-  "id_cennika" Integer,
-  "spz" Char(20 ) NOT NULL,
-  "znacka" Char(20 ) NOT NULL,
-  "typ" Char(20 ) NOT NULL,
-  "fotka" Blob,
-  "udrzby" "udrzba",
-  "datum_vyradenia" Date
-) NESTED TABLE "udrzby" STORE AS udrzby_tab;
-
+create table vozidlo(
+  id integer not null,
+  id_cennika integer,
+  spz char(20 ) not null,
+  znacka char(20 ) not null,
+  typ char(20 ) not null,
+  fotka blob,
+  udrzba udrzby,
+  datum_vyradenia date
+) NESTED TABLE udrzba STORE AS udrzba_tab;
 /
 
+-- create indexes for table vozidlo
 
--- Create indexes for table vozidla
-
-CREATE INDEX "IX_Relationship16" ON "vozidla" ("id_cennika")
+create index ix_relationship16 on vozidlo (id_cennika)
 /
 
--- Add keys for table vozidla
+-- add keys for table vozidlo
 
-ALTER TABLE "vozidla" ADD CONSTRAINT "id" PRIMARY KEY ("id")
+alter table vozidlo add constraint id primary key (id)
 /
 
-ALTER TABLE "vozidla" ADD CONSTRAINT "spz" UNIQUE ("spz")
+alter table vozidlo add constraint spz unique (spz)
 /
 
--- Table Zakaznik
+-- table vypozicka
 
-CREATE TABLE "Zakaznik"(
-  "id" Char(11 ) NOT NULL,
-  "id" Char(10 ) NOT NULL
+create table vypozicka(
+  id integer not null,
+  id_vozidla integer,
+  id_zakaznika char(10 ),
+  od date not null,
+  do date not null
 )
 /
 
--- Add keys for table Zakaznik
+-- create indexes for table vypozicka
 
-ALTER TABLE "Zakaznik" ADD CONSTRAINT "PK_Zakaznik" PRIMARY KEY ("id","id")
+create index ix_relationship4 on vypozicka (id_vozidla)
 /
 
--- Table vypozicky
+create index ix_relationship21 on vypozicka (id_zakaznika)
+/
 
-CREATE TABLE "vypozicky"(
-  "id" Integer NOT NULL,
-  "id_vozidla" Integer,
-  "id_zakaznika" Char(10 ),
-  "od" Date NOT NULL,
-  "do" Date NOT NULL
+-- add keys for table vypozicka
+
+alter table vypozicka add constraint pk_vypozicka primary key (id)
+/
+
+-- table udrzba
+
+create table udrzba(
+  id integer not null,
+  popis char(20 ) not null,
+  udaje t_udrzba not null,
+  cena real not null
 )
 /
 
--- Create indexes for table vypozicky
+-- add keys for table udrzba
 
-CREATE INDEX "IX_Relationship4" ON "vypozicky" ("id_vozidla")
+alter table udrzba add constraint pk_udrzba primary key (id)
 /
 
-CREATE INDEX "IX_Relationship21" ON "vypozicky" ("id_zakaznika")
-/
+-- table udrzba_vozidla
 
--- Add keys for table vypozicky
-
-ALTER TABLE "vypozicky" ADD CONSTRAINT "PK_vypozicky" PRIMARY KEY ("id")
-/
-
--- Table udrzba
-
-CREATE TABLE "udrzba"(
-  "id" Integer NOT NULL,
-  "popis" Char(20 ) NOT NULL,
-  "udaje" "t_udrzba" NOT NULL,
-  "cena" Real NOT NULL
+create table udrzba_vozidla(
+  id_vozidla integer not null,
+  id_udrzba integer not null
 )
 /
 
--- Add keys for table udrzba
+-- add keys for table udrzba_vozidla
 
-ALTER TABLE "udrzba" ADD CONSTRAINT "PK_udrzba" PRIMARY KEY ("id")
+alter table udrzba_vozidla add constraint pk_udrzba_vozidla primary key (id_vozidla,id_udrzba)
 /
 
--- Table udrzba_vozidla
+-- table cennik
 
-CREATE TABLE "udrzba_vozidla"(
-  "id_vozidla" Integer NOT NULL,
-  "id_udrzba" Integer NOT NULL
+create table cennik(
+  id integer not null,
+  cena_den real not null,
+  poplatok real not null,
+  platny_od date default sysdate not null,
+  platny_do date not null
 )
 /
 
--- Add keys for table udrzba_vozidla
+-- add keys for table cennik
 
-ALTER TABLE "udrzba_vozidla" ADD CONSTRAINT "PK_udrzba_vozidla" PRIMARY KEY ("id_vozidla","id_udrzba")
+alter table cennik add constraint pk_cennik primary key (id)
 /
 
--- Table cennik
+-- table vozidlo_cennik
 
-CREATE TABLE "cennik"(
-  "id" Integer NOT NULL,
-  "cena_den" Real NOT NULL,
-  "poplatok" Real NOT NULL,
-  "platny_od" Date DEFAULT sysdate NOT NULL,
-  "platny_do" Date NOT NULL
+create table vozidlo_cennik(
+  id integer not null
 )
 /
 
--- Add keys for table cennik
+-- add keys for table vozidlo_cennik
 
-ALTER TABLE "cennik" ADD CONSTRAINT "PK_cennik" PRIMARY KEY ("id")
+alter table vozidlo_cennik add constraint pk_vozidlo_cennik primary key (id)
 /
 
--- Table vozidlo_cennik
+-- table faktura
 
-CREATE TABLE "vozidlo_cennik"(
-  "id_vozidla" Integer NOT NULL,
-  "id_cennika" Integer NOT NULL,
-  "id" Integer NOT NULL
+create table faktura(
+  id integer not null,
+  id_vypozicky integer,
+  suma real not null,
+  vystavena date default sysdate not null,
+  zaplatena date
 )
 /
 
--- Add keys for table vozidlo_cennik
+-- create indexes for table faktura
 
-ALTER TABLE "vozidlo_cennik" ADD CONSTRAINT "PK_vozidlo_cennik" PRIMARY KEY ("id_vozidla","id_cennika","id")
+create index ix_relationship17 on faktura (id_vypozicky)
 /
 
--- Table faktura
+-- add keys for table faktura
 
-CREATE TABLE "faktura"(
-  "id" Integer NOT NULL,
-  "id_faktury" Integer,
-  "suma" Real NOT NULL,
-  "vystavena" Date DEFAULT sysdate NOT NULL,
-  "zaplatena" Date
+alter table faktura add constraint pk_faktura primary key (id)
+/
+
+-- table osoba
+
+create table osoba(
+  rod_cislo char(10 ) not null,
+  meno char(20 ) not null,
+  priezvisko char(20 ) not null
 )
 /
 
--- Create indexes for table faktura
+-- add keys for table osoba
 
-CREATE INDEX "IX_Relationship17" ON "faktura" ("id_faktury")
+alter table osoba add constraint pk_osoba primary key (rod_cislo)
 /
 
--- Add keys for table faktura
+-- table firma
 
-ALTER TABLE "faktura" ADD CONSTRAINT "PK_faktura" PRIMARY KEY ("id")
-/
-
--- Table vypozicka_faktura
-
-CREATE TABLE "vypozicka_faktura"(
-  "id_vypozicky" Integer NOT NULL,
-  "id_faktury" Integer NOT NULL
+create table firma(
+  ico char(10 ) not null,
+  nazov varchar2(30 ) not null
 )
 /
 
--- Add keys for table vypozicka_faktura
+-- add keys for table firma
 
-ALTER TABLE "vypozicka_faktura" ADD CONSTRAINT "PK_vypozicka_faktura" PRIMARY KEY ("id_vypozicky","id_faktury")
+alter table firma add constraint pk_firma primary key (ico)
 /
 
--- Table Osoba
+-- table zakaznik
 
-CREATE TABLE "Osoba"(
-  "rod_cislo" Char(10 ) NOT NULL,
-  "meno" Char(20 ) NOT NULL,
-  "priezvisko" Char(20 ) NOT NULL
+create table zakaznik(
+  id char(10 ) not null,
+  kontakt char(20 ) not null
 )
 /
 
--- Add keys for table Osoba
+-- add keys for table zakaznik
 
-ALTER TABLE "Osoba" ADD CONSTRAINT "PK_Osoba" PRIMARY KEY ("rod_cislo")
-/
-
--- Table Firma
-
-CREATE TABLE "Firma"(
-  "ico" Char(10 ) NOT NULL,
-  "nazov" Varchar2(30 ) NOT NULL
-)
+alter table zakaznik add constraint pk_zakaznik primary key (id)
 /
 
--- Add keys for table Firma
-
-ALTER TABLE "Firma" ADD CONSTRAINT "PK_Firma" PRIMARY KEY ("ico")
+-- trigger for sequence seq_pk_vozidla for column id in table vozidlo ---------
+create or replace trigger ts_vozidlo_seq_pk_vozidla before insert
+on vozidlo for each row
+begin
+  :new.id := seq_pk_vozidla.nextval;
+end;
+/
+create or replace trigger tsu_vozidlo_seq_pk_vozidla after update of id
+on vozidlo for each row
+begin
+  raise_application_error(-20010,'cannot update column id in table vozidlo as it uses sequence.');
+end;
 /
 
--- Table zakaznik
-
-CREATE TABLE "zakaznik"(
-  "id" Char(10 ) NOT NULL,
-  "kontakt" Char(20 ) NOT NULL
-)
+-- trigger for sequence seq_pk_vypozicky for column id in table vypozicka ---------
+create or replace trigger ts_vypozicka_seq_pk_vypozicky before insert
+on vypozicka for each row
+begin
+  :new.id := seq_pk_vypozicky.nextval;
+end;
+/
+create or replace trigger tsu_vypozicka_seq_pk_vypozicky after update of id
+on vypozicka for each row
+begin
+  raise_application_error(-20010,'cannot update column id in table vypozicka as it uses sequence.');
+end;
 /
 
--- Add keys for table zakaznik
-
-ALTER TABLE "zakaznik" ADD CONSTRAINT "PK_zakaznik" PRIMARY KEY ("id")
+-- trigger for sequence seq_pk_udrzba for column id in table udrzba ---------
+create or replace trigger ts_udrzba_seq_pk_udrzba before insert
+on udrzba for each row
+begin
+  :new.id := seq_pk_udrzba.nextval;
+end;
+/
+create or replace trigger tsu_udrzba_seq_pk_udrzba after update of id
+on udrzba for each row
+begin
+  raise_application_error(-20010,'cannot update column id in table udrzba as it uses sequence.');
+end;
 /
 
--- Trigger for sequence seq_pk_vozidla for column id in table vozidla ---------
-CREATE OR REPLACE TRIGGER "ts_vozidla_seq_pk_vozidla" BEFORE INSERT
-ON "vozidla" FOR EACH ROW
-BEGIN
-  :new."id" := "seq_pk_vozidla".nextval;
-END;
+-- trigger for sequence seq_pk_cennik for column id in table cennik ---------
+create or replace trigger ts_cennik_seq_pk_cennik before insert
+on cennik for each row
+begin
+  :new.id := seq_pk_cennik.nextval;
+end;
 /
-CREATE OR REPLACE TRIGGER "tsu_vozidla_seq_pk_vozidla" AFTER UPDATE OF "id"
-ON "vozidla" FOR EACH ROW
-BEGIN
-  RAISE_APPLICATION_ERROR(-20010,'Cannot update column "id" in table "vozidla" as it uses sequence.');
-END;
-/
-
--- Trigger for sequence seq_pk_osoba for column id in table Zakaznik ---------
-CREATE OR REPLACE TRIGGER "ts_Zakaznik_seq_pk_osoba" BEFORE INSERT
-ON "Zakaznik" FOR EACH ROW
-BEGIN
-  :new."id" := "seq_pk_osoba".nextval;
-END;
-/
-CREATE OR REPLACE TRIGGER "tsu_Zakaznik_seq_pk_osoba" AFTER UPDATE OF "id"
-ON "Zakaznik" FOR EACH ROW
-BEGIN
-  RAISE_APPLICATION_ERROR(-20010,'Cannot update column "id" in table "Zakaznik" as it uses sequence.');
-END;
+create or replace trigger tsu_cennik_seq_pk_cennik after update of id
+on cennik for each row
+begin
+  raise_application_error(-20010,'cannot update column id in table cennik as it uses sequence.');
+end;
 /
 
--- Trigger for sequence seq_pk_vypozicky for column id in table vypozicky ---------
-CREATE OR REPLACE TRIGGER "ts_vypozicky_seq_pk_vypozicky" BEFORE INSERT
-ON "vypozicky" FOR EACH ROW
-BEGIN
-  :new."id" := "seq_pk_vypozicky".nextval;
-END;
+-- trigger for sequence seq_pk_faktury for column id in table faktura ---------
+create or replace trigger ts_faktura_seq_pk_faktury before insert
+on faktura for each row
+begin
+  :new.id := seq_pk_faktury.nextval;
+end;
 /
-CREATE OR REPLACE TRIGGER "tsu_vypozicky_seq_pk_vypozicky" AFTER UPDATE OF "id"
-ON "vypozicky" FOR EACH ROW
-BEGIN
-  RAISE_APPLICATION_ERROR(-20010,'Cannot update column "id" in table "vypozicky" as it uses sequence.');
-END;
-/
-
--- Trigger for sequence seq_pk_udrzba for column id in table udrzba ---------
-CREATE OR REPLACE TRIGGER "ts_udrzba_seq_pk_udrzba" BEFORE INSERT
-ON "udrzba" FOR EACH ROW
-BEGIN
-  :new."id" := "seq_pk_udrzba".nextval;
-END;
-/
-CREATE OR REPLACE TRIGGER "tsu_udrzba_seq_pk_udrzba" AFTER UPDATE OF "id"
-ON "udrzba" FOR EACH ROW
-BEGIN
-  RAISE_APPLICATION_ERROR(-20010,'Cannot update column "id" in table "udrzba" as it uses sequence.');
-END;
-/
-
--- Trigger for sequence seq_pk_cennik for column id in table cennik ---------
-CREATE OR REPLACE TRIGGER "ts_cennik_seq_pk_cennik" BEFORE INSERT
-ON "cennik" FOR EACH ROW
-BEGIN
-  :new."id" := "seq_pk_cennik".nextval;
-END;
-/
-CREATE OR REPLACE TRIGGER "tsu_cennik_seq_pk_cennik" AFTER UPDATE OF "id"
-ON "cennik" FOR EACH ROW
-BEGIN
-  RAISE_APPLICATION_ERROR(-20010,'Cannot update column "id" in table "cennik" as it uses sequence.');
-END;
-/
-
--- Trigger for sequence seq_pk_vozidlo_cennik for column id in table vozidlo_cennik ---------
-CREATE OR REPLACE TRIGGER "ts_vozidlo_cennik_seq_pk_voz_2" BEFORE INSERT
-ON "vozidlo_cennik" FOR EACH ROW
-BEGIN
-  :new."id" := "seq_pk_vozidlo_cennik".nextval;
-END;
-/
-CREATE OR REPLACE TRIGGER "tsu_vozidlo_cennik_seq_pk_vo_2" AFTER UPDATE OF "id"
-ON "vozidlo_cennik" FOR EACH ROW
-BEGIN
-  RAISE_APPLICATION_ERROR(-20010,'Cannot update column "id" in table "vozidlo_cennik" as it uses sequence.');
-END;
-/
-
--- Trigger for sequence seq_pk_faktury for column id in table faktura ---------
-CREATE OR REPLACE TRIGGER "ts_faktura_seq_pk_faktury" BEFORE INSERT
-ON "faktura" FOR EACH ROW
-BEGIN
-  :new."id" := "seq_pk_faktury".nextval;
-END;
-/
-CREATE OR REPLACE TRIGGER "tsu_faktura_seq_pk_faktury" AFTER UPDATE OF "id"
-ON "faktura" FOR EACH ROW
-BEGIN
-  RAISE_APPLICATION_ERROR(-20010,'Cannot update column "id" in table "faktura" as it uses sequence.');
-END;
+create or replace trigger tsu_faktura_seq_pk_faktury after update of id
+on faktura for each row
+begin
+  raise_application_error(-20010,'cannot update column id in table faktura as it uses sequence.');
+end;
 /
 
 
--- Create foreign keys (relationships) section -------------------------------------------------
+-- create foreign keys (relationships) section ------------------------------------------------- 
 
-ALTER TABLE "vypozicky" ADD CONSTRAINT "je pozicane" FOREIGN KEY ("id_vozidla") REFERENCES "vozidla" ("id")
+alter table vypozicka add constraint je_pozicane foreign key (id_vozidla) references vozidlo (id)
 /
 
 
-ALTER TABLE "udrzba_vozidla" ADD CONSTRAINT "Relationship7" FOREIGN KEY ("id_vozidla") REFERENCES "vozidla" ("id")
+alter table udrzba_vozidla add constraint relationship7 foreign key (id_vozidla) references vozidlo (id)
 /
 
 
-ALTER TABLE "udrzba_vozidla" ADD CONSTRAINT "Relationship8" FOREIGN KEY ("id_udrzba") REFERENCES "udrzba" ("id")
+alter table udrzba_vozidla add constraint relationship8 foreign key (id_udrzba) references udrzba (id)
 /
 
 
-ALTER TABLE "vozidlo_cennik" ADD CONSTRAINT "vozidlo ma cennik" FOREIGN KEY ("id_vozidla") REFERENCES "vozidla" ("id")
+alter table vozidlo add constraint relationship16 foreign key (id_cennika) references cennik (id)
 /
 
 
-ALTER TABLE "vozidlo_cennik" ADD CONSTRAINT "vozidlo ma cenniky" FOREIGN KEY ("id_cennika") REFERENCES "cennik" ("id")
+alter table faktura add constraint relationship17 foreign key (id_vypozicky) references vypozicka (id)
 /
 
 
-ALTER TABLE "vypozicka_faktura" ADD CONSTRAINT "vypozicka ma fakturu" FOREIGN KEY ("id_vypozicky") REFERENCES "vypozicky" ("id")
+alter table vypozicka add constraint relationship21 foreign key (id_zakaznika) references zakaznik (id)
 /
 
 
-ALTER TABLE "vypozicka_faktura" ADD CONSTRAINT "vypozicku fakturujem" FOREIGN KEY ("id_faktury") REFERENCES "faktura" ("id")
+alter table osoba add constraint relationship22 foreign key (rod_cislo) references zakaznik (id)
 /
 
 
-ALTER TABLE "vozidla" ADD CONSTRAINT "Relationship16" FOREIGN KEY ("id_cennika") REFERENCES "cennik" ("id")
-/
-
-
-ALTER TABLE "faktura" ADD CONSTRAINT "Relationship17" FOREIGN KEY ("id_faktury") REFERENCES "vypozicky" ("id")
-/
-
-
-ALTER TABLE "Zakaznik" ADD CONSTRAINT "Relationship19" FOREIGN KEY ("id") REFERENCES "Osoba" ("rod_cislo")
-/
-
-
-ALTER TABLE "vypozicky" ADD CONSTRAINT "Relationship21" FOREIGN KEY ("id_zakaznika") REFERENCES "zakaznik" ("id")
-/
-
-
-ALTER TABLE "Osoba" ADD CONSTRAINT "Relationship22" FOREIGN KEY ("rod_cislo") REFERENCES "zakaznik" ("id")
-/
-
-
-ALTER TABLE "Firma" ADD CONSTRAINT "Relationship23" FOREIGN KEY ("ico") REFERENCES "zakaznik" ("id")
+alter table firma add constraint relationship23 foreign key (ico) references zakaznik (id)
 /
