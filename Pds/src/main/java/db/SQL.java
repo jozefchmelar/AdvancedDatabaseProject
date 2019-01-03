@@ -129,7 +129,7 @@ final public class SQL {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+       throw new  IllegalStateException();
     }
 
     @SuppressWarnings("unchecked")

@@ -2,6 +2,6 @@ package application.controller
 
 import tornadofx.*
 
-open class MyController : Controller() {
-
+abstract class MyController : Controller() {
+    abstract fun get()
 }

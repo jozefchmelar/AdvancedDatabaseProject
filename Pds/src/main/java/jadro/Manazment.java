@@ -6,6 +6,8 @@ import model.*;
 import javax.swing.*;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 
 public class Manazment {
     private Cennik cennik;
@@ -97,8 +99,8 @@ public class Manazment {
     /*
      * Nacita mnoziny dat
      */
-    public void nacitajVozidla(String vyrazWhere) {
-        ArrayList<Vozidlo> zoznamVozidiel = SQL.runQueryToList("Select * from vozidlo " + vyrazWhere);
+    public List<Vozidlo> nacitajVozidla(String vyrazWhere) {
+       return new ArrayList<>(SQL.runQueryToList("Select * from vozidlo " + vyrazWhere));
     }
 
     public void nacitajCenniky(String vyrazWhere) {
@@ -122,8 +124,8 @@ public class Manazment {
         ArrayList<Osoba> zoznamZakaznikovOsob = SQL.runQueryToList("Select * from zakaznik join osoba on zakaznik.id = osoba.rod_cislo " + vyrazWhere);
     }
 
-    public void nacitajZakaznikovFirmy(String vyrazWhere) {
-        ArrayList<Firma> zoznamZakaznikovFiriem = SQL.runQueryToList("Select * from zakaznik join firma on zakaznik.id = firma.ico " + vyrazWhere);
+    public List<Firma> nacitajZakaznikovFirmy(String vyrazWhere) {
+        return new ArrayList<>(Objects.requireNonNull(SQL.runQueryToList("Select * from zakaznik join firma on zakaznik.id = firma.ico " + vyrazWhere)));
     }
 
 
