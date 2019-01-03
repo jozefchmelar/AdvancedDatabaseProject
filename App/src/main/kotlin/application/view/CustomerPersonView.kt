@@ -4,6 +4,7 @@ import application.controller.*
 import application.model.*
 import javafx.geometry.*
 import javafx.scene.layout.*
+import tableviewpag
 import tornadofx.*
 
 class CustomerPersonView : View("Person") {
@@ -22,22 +23,14 @@ class CustomerPersonView : View("Person") {
 
                     text("Persons").addClass("card-title")
                     hgrow= Priority.ALWAYS
-                    tableview(controller.companies) {
+                    tableviewpag(controller.people) {
                         smartResize()
-                        column("Nazov", CompanyModel::nazov).apply { isSortable = false }
-                        column("Ico", CompanyModel::ico).apply { isSortable = false }
-                        column("Kontakt", CompanyModel::kontakt).apply { isSortable = false }
+                        column("First name", PersonModel::meno).apply { isSortable = false }
+                        column("Last name", PersonModel::priezvisko).apply { isSortable = false }
+                        column("Birth nubmer", PersonModel::rodCislo).apply { isSortable = false }
+                        column("Contatc", PersonModel::kontakt).apply { isSortable = false }
                     }
-                    borderpane {
-                        left = button("Older").addClass("button-flat")
-                        center = label(controller.page)
-                        right = button("Newer") {
-                            addClass("button-flat")
-                            action { controller.getMore() }
-                        }
 
-                    }
-                    button("Get") { action { runAsync { controller.get() } } }
                 }
             }
 

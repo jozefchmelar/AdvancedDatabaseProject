@@ -17,6 +17,5 @@ class CustomersView : View("Customers") {
         tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
         tab(CustomerPersonView::class)
         tab(CustomerCompanyView::class)
-
     }
 }

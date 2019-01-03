@@ -7,25 +7,14 @@ import model.*
 import tornadofx.*
 
 class CustomersController : Controller() {
-    val companies = FXCollections.observableArrayList<CompanyModel>()
-    val page = SimpleIntegerProperty(1)
 
-    val people = FXCollections.observableArrayList<PersonModel>()
+    val companies = TableModel { Db.connection.nacitajZakaznikovFirmy("", "", 10, it).map(::CompanyModel) }
+    val people = TableModel { Db.connection.nacitajZakaznikovOsoby("", "", 10, it).map(::PersonModel) }
 
-     fun get(page:Int =1) {
-        companies.setAll(Db.connection.nacitajZakaznikovFirmy("","",10,page).map(::CompanyModel))
+    init {
+        companies.current()
+        people.current()
     }
-
-    fun getMore() {
-        page.set(page.value + 1)
-        get(page.value)
-    }
-
-    fun getLess() {
-        page.set(page.value -1)
-        get(page.value)
-    }
-
 
     fun savePerson(item: Osoba) {
 
@@ -36,7 +25,7 @@ class CustomersController : Controller() {
     }
 }
 
-class TableModel<T>(val getCurrent : (Int) -> List<*>) {
+class TableModel<T>(private val getCurrent: (Int) -> List<T>) {
 
     val list = FXCollections.observableArrayList<T>()
     val page = SimpleIntegerProperty(1)
@@ -52,6 +41,6 @@ class TableModel<T>(val getCurrent : (Int) -> List<*>) {
         current()
     }
 
-    fun current() = getCurrent(page.value)
+    fun current() = getCurrent(page.value).let(list::setAll)
 
 }

@@ -1,13 +1,13 @@
 package application.controller
 
-import application.model.*
-import javafx.collections.*
+import application.model.RentalModel
+import tornadofx.Controller
 
-class RentalController : MyController() {
-    val rentals = FXCollections.observableArrayList<RentalModel>()
+class RentalController : Controller() {
+    val rentals = TableModel { Db.connection.nacitajVypozicky("", "", 25, it).map(::RentalModel) }
 
-    override fun get() {
-        rentals.setAll(Db.connection.nacitajVypozicky("","",25,1).map(::RentalModel))
+    init {
+        rentals.current()
     }
 }
 

@@ -8,7 +8,7 @@ class InvoiceModel : ItemViewModel<Faktura> {
     constructor(item: Faktura) : super(item)
     constructor() : super()
 
-    val id = bind(Vozidlo::getId)
+    val id = bind(Faktura::getId)
     val vypozicka = bind(Faktura::getVypozicka)
     val suma = bind(Faktura::getSuma)
     val datumVystavenia = bind(Faktura::getDatumVystavenia)

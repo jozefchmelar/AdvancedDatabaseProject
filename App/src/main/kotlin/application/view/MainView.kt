@@ -29,14 +29,7 @@ class MainView : View("PDS") {
             tab(RentalView::class)
             tab(VehiclesView::class)
         }
-        bottom = vbox {
-//            textfield(controller.durationProperty, converter = DoubleConv { "Duration : " + it.format() })
-//            slider(min = 0.01, max = 2) {
-//                isShowTickLabels = true
-//                valueProperty().bindBidirectional(controller.durationProperty)
-//                setOnMouseReleased { controller.setSimSpeed() }
-//            }
-        }
+
     }.also { primaryStage.setOnCloseRequest { System.exit(0) } }
 
 

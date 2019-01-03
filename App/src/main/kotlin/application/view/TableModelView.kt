@@ -5,6 +5,7 @@ import javafx.scene.control.*
 import tornadofx.*
 
 fun <T> EventTarget.tableviewpag(items: TableModel<T>, op: TableView<T>.() -> Unit = {}) = vbox {
+
     tableview(items.list) {
         op()
     }

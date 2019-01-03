@@ -11,6 +11,10 @@ class PricingController : Controller() {
         Db.connection.pridajCennik(item)
     }
 
-    val pricing = TableModel<InvoiceModel> {  emptyList<InvoiceModel>()}//TODO }
+    val pricing = TableModel { Db.connection.nacitajCenniky("","",10,it).map(::PricingModel) }
+
+    init {
+        pricing.current()
+    }
 
 }

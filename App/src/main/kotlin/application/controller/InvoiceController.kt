@@ -2,12 +2,14 @@ package application.controller
 
 import application.model.*
 import javafx.collections.*
+import tornadofx.Controller
 
-class InvoiceController : MyController() {
+class InvoiceController : Controller() {
 
-    val invoices = TableModel<InvoiceModel> { Db.connection.nacitajFaktury("","",25,1) }
+    val invoices = TableModel { Db.connection.nacitajFaktury("","",10,it).map(::InvoiceModel) }
 
-    override fun get() {
-        //  invoices.setAll(Db.connection.nacitajFaktury("").map(::InvoiceModel))
+    init {
+        invoices.current()
     }
+
 }

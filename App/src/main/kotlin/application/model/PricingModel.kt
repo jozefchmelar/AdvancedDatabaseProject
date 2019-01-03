@@ -13,8 +13,8 @@ class PricingModel : ItemViewModel<Cennik> {
     val id        = bind(Cennik::getId)
     val cena_den  = bind { item?.cena_den?.toString()?.toProperty() ?: "0.0".toProperty()}
     val poplatok  = bind { item?.poplatok?.toString()?.toProperty() ?: "0.0".toProperty()}
-    val platny_od = bind{ if(item==null) LocalDate.now().toProperty() else item.platny_od?.toLocalDate()?.toProperty()}
-    val platny_do = bind{ if(item==null) LocalDate.now().toProperty() else item.platny_do?.toLocalDate()?.toProperty()}
+    val platny_od = bind { item?.platny_od?.toLocalDate().toProperty()}//bind{ item.platny_do }//if(item==null) LocalDate.now().toProperty() else item.platny_od?.toLocalDate()?.toProperty()}
+    val platny_do = bind { item?.platny_do?.toLocalDate().toProperty()}//bind{ item.platny_do.toInstant().let { LocalDateTime.ofInstant(it,ZoneId.systemDefault()) }.let { LocalDate.of(it.year,it.month,it.dayOfMonth) } }//if(item==null) LocalDate.now().toProperty() else item.platny_do?.toLocalDate()?.toProperty()}
 
     override fun onCommit() {
         super.onCommit()
@@ -28,5 +28,5 @@ class PricingModel : ItemViewModel<Cennik> {
     }
 }
 
-fun Date?.toLocalDate(): LocalDate = this?.time?.let { LocalDate.ofEpochDay(it) } ?: LocalDate.now()
+fun Date.toLocalDate(): LocalDate = LocalDate.now() //this?.toInstant().let { LocalDateTime.ofInstant(it,ZoneId.systemDefault()) }.let { LocalDate.of(it.year,it.month,it.dayOfMonth) } ?: LocalDate.now()
 fun LocalDate.toDate() = Date(toEpochDay())

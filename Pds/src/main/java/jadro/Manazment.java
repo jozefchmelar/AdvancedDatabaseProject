@@ -108,13 +108,21 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) v ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
+        vyraz += " ) v ) where rn between " +  ((indexStranky-1) * velkostStranky+1 ) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 
-    public void nacitajCenniky(String vyrazWhere) {
-        ArrayList<Cennik> zoznamCennikov = SQL.runQueryToList("Select * from cennik " + vyrazWhere);
-    }
+    public List<Cennik> nacitajCenniky(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
+        String vyraz = "select * from" +
+                "( select v.*, rownum as rn " +
+                "from ( select * from cennik " + vyrazWhere;
+        if (vyrazOrder.equals("")) {
+            vyraz += " order by platny_od";
+        } else {
+            vyraz += " order by " + vyrazOrder;
+        }
+        vyraz += " ) v ) where rn between " +  ((indexStranky-1) * velkostStranky+1 ) + " and " + velkostStranky * indexStranky;
+        return SQL.runQueryToList(vyraz);    }
 
     //pouzitie:
     //  ArrayList<Vypozicka> test = (ArrayList<Vypozicka>) man.nacitajVypozicky("where id_vozidla < 10000", "od", 10, 1);
@@ -127,7 +135,7 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) v ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
+        vyraz += " ) v ) where rn between " +  ((indexStranky-1) * velkostStranky+1 ) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 
@@ -142,7 +150,7 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) f ) where rn between " + ( (indexStranky) * velkostStranky - velkostStranky ) + " and " + ((indexStranky)*velkostStranky ) ;
+        vyraz += " ) f ) where rn between " + ((indexStranky-1) * velkostStranky+1 ) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 
@@ -161,7 +169,7 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) o ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
+        vyraz += " ) o ) where rn between " + ((indexStranky - 1) * velkostStranky + 1) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 
@@ -175,7 +183,7 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) f ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
+        vyraz += " ) f ) where rn between " + ((indexStranky-1) * velkostStranky+1 ) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 

@@ -14,36 +14,7 @@ class VehiclesView : View("Vehicles") {
         padding = Insets(20.0)
 
         center = borderpane {
-            top {
-                borderpane {
-                    paddingTop = 25
 
-                    center { label("Who's renting a car?").addClass("card-title") }
-                }
-            }
-            center {
-
-                vbox {
-                    vgrow = Priority.ALWAYS
-                    hbox {
-                        addClass("card")
-                        text("Company").addClass("card-title")
-                        setOnMouseClicked { println("company click") }
-                    }
-
-
-
-                    hbox {
-                        paddingTop = 50
-                        addClass("card")
-                        text("Person").addClass("card-title")
-                        setOnMouseClicked { println("person clik") }
-
-                    }
-
-                }
-
-            }
 
 
         }

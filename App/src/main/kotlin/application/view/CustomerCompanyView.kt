@@ -3,6 +3,7 @@ package application.view
 import application.controller.*
 import application.model.*
 import javafx.scene.layout.*
+import tableviewpag
 import tornadofx.*
 
 class CustomerCompanyView : View("Company") {
@@ -20,26 +21,15 @@ class CustomerCompanyView : View("Company") {
                 vbox {
                     addClass("card")
                     text("Companies").addClass("card-title")
+
                     hgrow = Priority.ALWAYS
-                    tableview(controller.companies) {
+                    tableviewpag(controller.companies) {
                         smartResize()
                         column("Nazov", CompanyModel::nazov).apply { isSortable = false }
                         column("Ico", CompanyModel::ico).apply { isSortable = false }
                         column("Kontakt", CompanyModel::kontakt).apply { isSortable = false }
                     }
-                    borderpane {
-                        left = button("Older") {
-                            addClass("button-flat")
-                            action { controller.getLess() }
-                        }
-                        center = label(controller.page)
-                        right = button("Newer") {
-                            addClass("button-flat")
-                            action { controller.getMore() }
-                        }
 
-                    }
-                    button("Get") { action { runAsync { controller.get() } } }
                 }
             }
 
@@ -65,7 +55,6 @@ class CustomerCompanyView : View("Company") {
                     }
                 }
                 hbox {
-
                     button("Get") {
                         createdCompany.commit()
                         controller.saveCompany(createdCompany.item)

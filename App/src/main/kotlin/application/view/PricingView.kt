@@ -22,8 +22,14 @@ class PricingView : View("Pricing") {
                     addClass("card")
                     text("Pricing").addClass("card-title")
                     hgrow = Priority.ALWAYS
-                    tableviewpag(controller.pricing)
-
+                    tableviewpag(controller.pricing){
+                        smartResize()
+                        column("#", PricingModel::id).apply { isSortable = false }
+                        column("cena_den", PricingModel::cena_den).apply { isSortable = false }
+                        column("poplatok", PricingModel::poplatok).apply { isSortable = false }
+                        column("platny_od", PricingModel::platny_od).apply { isSortable = false }
+                        column("platny_do", PricingModel::platny_do).apply { isSortable = false }
+                    }
                 }
 
             }
