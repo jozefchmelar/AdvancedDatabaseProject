@@ -17,7 +17,7 @@ class PersonModel : ItemViewModel<Osoba> {
     override fun onCommit() {
         super.onCommit()
         item = Osoba(
-                id.value,
+                "0",
                 kontakt.value,
                 rodCislo.value,
                 meno.value,

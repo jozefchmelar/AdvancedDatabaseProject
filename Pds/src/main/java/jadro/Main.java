@@ -1,8 +1,10 @@
 package jadro;
 
 import db.SQL;
+import model.Osoba;
 
 import java.sql.SQLException;
+import java.util.ArrayList;
 
 public class Main {
 
@@ -32,6 +34,7 @@ public class Main {
 //        Faktura faktura = new Faktura(55555, new Vypozicka(420), 999, new Date(), new Date());
 //        Osoba osoba = new Osoba("5555555555", "9408218666", "5555555555", "test", "test");
 //        SQL.runInsertQuery(osoba);
-//        ArrayList<Osoba> zoznamZakaznikovOsob = SQL.runQueryToList("Select * from zakaznik join osoba on zakaznik.id = osoba.rod_cislo " + "where zakaznik.id = '2604953300'");
+        ArrayList<Osoba> zoznamZakaznikovOsob = SQL.runQueryToList("Select * from zakaznik join osoba on zakaznik.id = osoba.rod_cislo " + "where zakaznik.id = '2604953300'");
+        System.out.println(zoznamZakaznikovOsob);
     }
 }

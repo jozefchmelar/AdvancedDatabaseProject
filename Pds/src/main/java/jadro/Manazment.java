@@ -100,19 +100,19 @@ public class Manazment {
      * Nacita mnoziny dat
      */
     public List<Vozidlo> nacitajVozidla(String vyrazWhere) {
-       return new ArrayList<>(SQL.runQueryToList("Select * from vozidlo " + vyrazWhere));
+       return (SQL.runQueryToList("Select * from vozidlo " + vyrazWhere));
     }
 
-    public void nacitajCenniky(String vyrazWhere) {
-        ArrayList<Cennik> zoznamCennikov = SQL.runQueryToList("Select * from cennik " + vyrazWhere);
+    public ArrayList<Cennik> nacitajCenniky(String vyrazWhere) {
+        return SQL.runQueryToList("Select * from cennik " + vyrazWhere);
     }
 
     public void nacitajVypozicky(String vyrazWhere) {
         ArrayList<Cennik> zoznamVypoziciek = SQL.runQueryToList("Select * from vypozicka " + vyrazWhere);
     }
 
-    public void nacitajFaktury(String vyrazWhere) {
-        ArrayList<Faktura> zoznamFaktur = SQL.runQueryToList("Select * from faktura " + vyrazWhere);
+    public ArrayList<Faktura> nacitajFaktury(String vyrazWhere) {
+        return SQL.runQueryToList("Select * from faktura " + vyrazWhere);
     }
 
     //TODO

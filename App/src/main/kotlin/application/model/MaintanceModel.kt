@@ -11,7 +11,7 @@ class MaintanceModel : ItemViewModel<Udrzba> {
     val pocetKM = bind(Udrzba::getPocetKM)
     val datumOD = bind(Udrzba::getDatumOD)
     val datumDO = bind(Udrzba::getDatumDO)
-    val popis = bind(Udrzba::getPopis)
+    val popis   = bind(Udrzba::getPopis)
 
     override fun onCommit() {
         super.onCommit()
