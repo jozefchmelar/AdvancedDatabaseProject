@@ -3,9 +3,7 @@ package db;
 import jadro.*;
 import model.*;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.function.Consumer;
 
@@ -111,6 +109,15 @@ final public class SQL {
                     while (p.next()) {
                         Vozidlo vozidlo = new Vozidlo(p.getInt("id"), new Cennik(p.getInt("id_cennika")),
                                 p.getString("spz"), p.getString("znacka"), p.getString("typ"), null, p.getDate("datum_vyradenia"));
+                        Array array = p.getArray("udrzba");
+                        if (array != null) {
+                            Object[] zoznamUdrzieb = (Object[]) array.getArray();
+                            for (int i = 0; i < zoznamUdrzieb.length; i++) {
+                                Struct udrzbaRaw = (Struct) zoznamUdrzieb[i];
+                                Object[] attributes = udrzbaRaw.getAttributes();
+                                vozidlo.getUdrzby().add(new Udrzba(attributes));
+                            }
+                        }
                         resultList.add(vozidlo);
                     }
                     break;
@@ -129,7 +136,7 @@ final public class SQL {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-       throw new  IllegalStateException();
+        throw new IllegalStateException();
     }
 
     @SuppressWarnings("unchecked")
@@ -181,4 +188,15 @@ final public class SQL {
         return -1;
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> int runUpdateQuery(String query) {
+        try {
+            String query2 = "Update vozidlo set spz='test2' Where spz='test'";
+            PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(query2);
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return -1;
+    }
 }

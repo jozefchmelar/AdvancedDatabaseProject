@@ -73,7 +73,7 @@ public class Faktura {
     public String toString() {
         return "Faktura{" +
                 "id=" + id +
-                ", vypozicka=" + vypozicka +
+                ", vypozicka=" + vypozicka.getId() +
                 ", suma=" + suma +
                 ", datumVystavenia=" + datumVystavenia +
                 ", datumZaplatenia=" + datumZaplatenia +
