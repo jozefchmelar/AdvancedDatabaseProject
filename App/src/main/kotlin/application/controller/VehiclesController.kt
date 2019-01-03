@@ -7,7 +7,7 @@ class VehiclesController : MyController() {
     val vehicles = FXCollections.observableArrayList<VehicleModel>()
 
     override fun get() {
-        vehicles.setAll(Db.connection.nacitajVozidla("").map(::VehicleModel))
+        vehicles.setAll(Db.connection.nacitajVozidla("","",25,1).map(::VehicleModel))
     }
 }
 

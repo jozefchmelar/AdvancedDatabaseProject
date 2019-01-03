@@ -142,7 +142,7 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) f ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
+        vyraz += " ) f ) where rn between " + ( (indexStranky) * velkostStranky - velkostStranky ) + " and " + ((indexStranky)*velkostStranky ) ;
         return SQL.runQueryToList(vyraz);
     }
 
@@ -175,7 +175,7 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) f ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
+        vyraz += " ) f ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 

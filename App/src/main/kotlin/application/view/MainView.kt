@@ -3,6 +3,7 @@ package application.view
 import application.controller.MyController
 import javafx.scene.control.TabPane
 import javafx.scene.layout.Priority
+import javafx.stage.*
 import tornadofx.* // ktlint-disable
 
 class MainView : View("PDS") {
@@ -13,18 +14,14 @@ class MainView : View("PDS") {
         minWidth = 1000.0
         vgrow = Priority.ALWAYS
         hgrow = Priority.ALWAYS
-//        top = vbox {
-//            hbox {
-//                addClass("menu-bar")
-//                spacing = 10.0
-//                button("Full speed") { action { controller.fullSpeed() } }
-//                button("Slow speed") { action { controller.setSimSpeed() } }
-//                button("PAUSE") { action { controller.pause() } }
-//                button("RESUME") { action { controller.resume() } }
-//                textfield(controller.simTime, converter = NumberTimeConv())
-//            }
-//        }
+        top =
+            toolbar {
+                addClass("toolbar-colored")
+                label("Car rental").addClass("card-title")
+            }
+
         center = tabpane {
+            insets(20.0)
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
             tab(CustomersView::class)
             tab(InvoicesView::class)
