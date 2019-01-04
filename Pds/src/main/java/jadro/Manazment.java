@@ -62,6 +62,26 @@ public class Manazment {
         this.faktura = faktura;
     }
 
+    private Zakaznik zistiTypZakaznika(String idZakaznika) {
+        Zakaznik zakaznik = null;
+        try {
+            ResultSet rs = SQL.runToResultSet("Select * from zakaznik join firma on zakaznik.id = firma.ico where zakaznik.id = '" + idZakaznika + "'");
+            if (rs.next()) {
+                zakaznik = new Firma(idZakaznika, rs.getString("kontakt"), idZakaznika, rs.getString("nazov"));
+            } else {
+                rs = SQL.runToResultSet("Select * from zakaznik join osoba on zakaznik.id = osoba.rod_cislo where zakaznik.id = '" + idZakaznika + "'");
+                if (rs.next()) {
+                    zakaznik = new Osoba(idZakaznika, rs.getString("kontakt"), idZakaznika, rs.getString("meno"), rs.getString("priezvisko"));
+                } else {
+                    zakaznik = new Zakaznik(idZakaznika);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return zakaznik;
+    }
+
 
     /*
      * For GUI
@@ -69,33 +89,34 @@ public class Manazment {
 
     /*
      * Inserty
+     * vrati pocet vlozenych riadkov, alebo -1 v pripade erroru
      */
-    public void pridajCennik(Cennik cennik) {
-        SQL.runInsertQuery(cennik);
+    public int pridajCennik(Cennik cennik) {
+        return SQL.runInsertQuery(cennik);
     }
 
-    public void pridajVozidlo(Vozidlo vozidlo) {
-        SQL.runInsertQuery(vozidlo);
+    public int pridajVozidlo(Vozidlo vozidlo) {
+        return SQL.runInsertQuery(vozidlo);
     }
 
-    public void pridajUdrzbu(Udrzba udrzba) {
-        SQL.runInsertQuery(udrzba);
+    public int pridajUdrzbu(Udrzba udrzba) {
+        return SQL.runInsertQuery(udrzba);
     }
 
-    public void pridajVypozicku(Vypozicka vypozicka) {
-        SQL.runInsertQuery(vypozicka);
+    public int pridajVypozicku(Vypozicka vypozicka) {
+        return SQL.runInsertQuery(vypozicka);
     }
 
-    public void pridajFakturu(Faktura faktura) {
-        SQL.runInsertQuery(faktura);
+    public int pridajFakturu(Faktura faktura) {
+        return SQL.runInsertQuery(faktura);
     }
 
-    public void pridajOsobu(Osoba osoba) {
-        SQL.runInsertQuery(osoba);
+    public int pridajOsobu(Osoba osoba) {
+        return SQL.runInsertQuery(osoba);
     }
 
-    public void pridajFirmu(Firma firma) {
-        SQL.runInsertQuery(firma);
+    public int pridajFirmu(Firma firma) {
+        return SQL.runInsertQuery(firma);
     }
 
     /*
@@ -149,7 +170,7 @@ public class Manazment {
                             new Zakaznik(rs.getString("id_zakaznika")), rs.getDate("od"), rs.getDate("do"));
                     Vozidlo vozidlo = new Vozidlo(rs.getInt("id_vozidla"), new Cennik(rs.getInt("id_cennika")),
                             rs.getString("spz"), rs.getString("znacka"), rs.getString("typ"), null, rs.getDate("datum_vyradenia")); //TODO fotka
-                    Zakaznik zakaznik = new Zakaznik(rs.getString("id_zakaznika"), rs.getString("kontakt"));
+                    Zakaznik zakaznik = zistiTypZakaznika(rs.getString("id_zakaznika"));
                     vypozicka.setVozidlo(vozidlo);
                     vypozicka.setZakaznik(zakaznik);
                     zoznamVypoziciek.add(vypozicka);
@@ -167,7 +188,10 @@ public class Manazment {
     public List<Faktura> nacitajFaktury(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
         String vyraz = "select * from" +
                 "( select f.*, rownum as rn " +
-                "from ( select * from faktura join vypozicka on faktura.id_vypozicky = vypozicka.id join vozidlo on vypozicka.id_vozidla = vozidlo.id join zakaznik on vypozicka.id_zakaznika = zakaznik.id "
+                "from ( select * from faktura " +
+                "join vypozicka on faktura.id_vypozicky = vypozicka.id " +
+                "join vozidlo on vypozicka.id_vozidla = vozidlo.id " +
+                "join zakaznik on vypozicka.id_zakaznika = zakaznik.id "
                 + vyrazWhere;
         if (vyrazOrder.equals("")) {
             vyraz += " order by zaplatena";
@@ -186,7 +210,7 @@ public class Manazment {
                             new Zakaznik(rs.getString("id_zakaznika")), rs.getDate("od"), rs.getDate("do"));
                     Vozidlo vozidlo = new Vozidlo(rs.getInt("id_vozidla"), new Cennik(rs.getInt("id_cennika")),
                             rs.getString("spz"), rs.getString("znacka"), rs.getString("typ"), null, rs.getDate("datum_vyradenia")); //TODO fotka
-                    Zakaznik zakaznik = new Zakaznik(rs.getString("id_zakaznika"), rs.getString("kontakt"));
+                    Zakaznik zakaznik = zistiTypZakaznika(rs.getString("id_zakaznika"));
                     vypozicka.setVozidlo(vozidlo);
                     vypozicka.setZakaznik(zakaznik);
                     faktura.setVypozicka(vypozicka);
@@ -302,7 +326,6 @@ public class Manazment {
         return SQL.runUpdateQuery(vyraz);
     }
 
-    //toto nie je otestovane, lebo ma stale lockuje db
     //tu to bolo moc komplikovane, tak radsej takto cez objekty
     public int updateOsoby(Osoba staraOsoba, Osoba novaOsoba) {
         String vyraz = "";
@@ -326,9 +349,43 @@ public class Manazment {
         }
     }
 
-//    public int updateVozidla(String vyrazWhere, String vyrazSet) {
-//        String vyraz = "Update vozidlo set " + vyrazSet + " Where " + vyrazWhere;
-//        return SQL.runUpdateQuery(vyraz);
-//    }
+    public int updateFirmy(Firma staraFirma, Firma novaFirma) {
+        String vyraz = "";
+        //ci doslo k zmene PK
+        if (!staraFirma.getIco().equals(novaFirma.getIco())) {
+            //insertne sa novy zakaznik
+            Zakaznik novyZakaznik = new Zakaznik(novaFirma.getIco(), novaFirma.getKontakt());
+            if (SQL.runInsertQuery(novyZakaznik) <= 0) {
+                return -1;
+            }
+            //update vsetkych child zaznamov
+            int kontrola = SQL.runUpdateQuery("Update vypozicka set id_zakaznika = '" + novaFirma.getIco() + "' where id_zakaznika = '" + staraFirma.getIco() + "'");
+            kontrola = SQL.runUpdateQuery("Update firma set ico = '" + novaFirma.getIco() + "', nazov = '" + novaFirma.getNazov()
+                    + "' where ico = '" + staraFirma.getIco() + "'");
+            //deletne sa stary zaznam
+            return SQL.runUpdateQuery("Delete from zakaznik where id = '" + staraFirma.getIco() + "'");
+        } else {
+            int kontrola = SQL.runUpdateQuery("Update zakaznik set kontakt = '" + novaFirma.getKontakt() + "'");
+            return SQL.runUpdateQuery("Update firma set nazov = '" + novaFirma.getNazov()
+                    + "' where ico = '" + staraFirma.getIco() + "'");
+        }
+    }
+
+    //tu je problem, ako rozlisit udrzby? Nemame tam ID, ani nic unikatne, tak povedzme ze unikatnost udrzby bude podla kombinacie vsetkych jej atributov
+    public int updateUdrzby(Vozidlo vozidloSUdrzbami, Udrzba staraUdrzba, Udrzba novaUdrzba) {
+        String vyraz = "update table ( select v.udrzba from vozidlo v where v.spz = '" + vozidloSUdrzbami.getSpz() + "') u set u.km = "
+                + novaUdrzba.getPocetKM() + ", u.cena = " + novaUdrzba.getCena() + ", u.od = to_date('" + new java.sql.Date(novaUdrzba.getDatumOD().getTime()).toString()
+                + "', 'yyyy-mm-dd'), u.do = to_date('" + new java.sql.Date(novaUdrzba.getDatumDO().getTime()).toString() + "', 'yyyy-mm-dd'), u.popis = '" + novaUdrzba.getPopis() + "'"
+                + " where u.km = " + staraUdrzba.getPocetKM() + " and u.cena = " + staraUdrzba.getCena() + " and u.od = to_date('"
+                + new java.sql.Date(staraUdrzba.getDatumOD().getTime()).toString() + "', 'yyyy-mm-dd') and u.do = to_date('" + new java.sql.Date(staraUdrzba.getDatumDO().getTime()).toString() + "', 'yyyy-mm-dd')";
+        if (staraUdrzba.getPopis().isEmpty()) {
+            vyraz += " and u.popis is null";
+        } else {
+            vyraz += " and u.popis = '" + staraUdrzba.getPopis() + "'";
+        }
+        String lol = new java.sql.Date(staraUdrzba.getDatumDO().getTime()).toString();
+        return SQL.runUpdateQuery(vyraz);
+    }
+
 }
 
