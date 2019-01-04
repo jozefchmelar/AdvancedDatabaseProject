@@ -130,6 +130,16 @@ final public class SQL {
                         resultList.add(vypozicka);
                     }
                     break;
+                case "CENA":
+                    resultList = new ArrayList<Vozidlo>();
+                    while (p.next()) {
+                        Vozidlo vozidlo = new Vozidlo(p.getInt("id"), new Cennik(p.getInt("id_cennika")),
+                                p.getString("spz"), p.getString("znacka"), p.getString("typ"), null, p.getDate("datum_vyradenia"));
+                        Udrzba udrzba = new Udrzba(p.getLong("km"), p.getDouble("cena"), p.getDate("od"), p.getDate("do"), p.getString("popis"));
+                        vozidlo.getUdrzby().add(udrzba);
+                        resultList.add(vozidlo);
+                    }
+                    break;
                 default:
                     System.err.println("Unsupported type usage in SQL.runToList.");
                     break;
@@ -189,8 +199,12 @@ final public class SQL {
                 } else {
                     return 0;
                 }
+            } else if (data instanceof Zakaznik) {
+                String query = "Insert into Zakaznik ( id, kontakt ) Values (?,?)";
+                ps = ((Zakaznik) data).insertStatementZakaznik(PdsConnection.getInstance().getConnection().prepareStatement(query));
             }
-            return ps.executeUpdate();
+            int vysl = ps.executeUpdate();
+            return vysl;
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -200,12 +214,22 @@ final public class SQL {
     @SuppressWarnings("unchecked")
     public static <T> int runUpdateQuery(String query) {
         try {
-            String query2 = "Update vozidlo set spz='test2' Where spz='test'";
-            PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(query2);
+            PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(query);
             return ps.executeUpdate();
         } catch (SQLException e) {
             e.printStackTrace();
         }
         return -1;
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T> ResultSet runToResultSet(String query) {
+        try {
+            PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(query);
+            return ps.executeQuery();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
