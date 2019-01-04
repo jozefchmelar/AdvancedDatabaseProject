@@ -1,5 +1,6 @@
 package application.model
 
+import javafx.collections.*
 import model.*
 import tornadofx.*
 
@@ -14,7 +15,7 @@ class VehicleModel : ItemViewModel<Vozidlo> {
     val znacka = bind(Vozidlo::getZnacka)
     val typ = bind(Vozidlo::getTyp)
     val fotkaCesta = bind(Vozidlo::getFotkaCesta)
-//    val udrzby = bind(Vozidlo::getUdrzby)
+    val udrzby = bind { item?.udrzby?.sortedBy { -it.pocetKM }?.map(::MaintanceModel)?.observable()?.toProperty() ?: FXCollections.observableArrayList<MaintanceModel>().toProperty() }
     val datum_vyradenia = bind(Vozidlo::getDatum_vyradenia)
 
     override fun onCommit() {

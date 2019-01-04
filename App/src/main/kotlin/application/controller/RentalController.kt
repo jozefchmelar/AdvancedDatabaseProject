@@ -6,14 +6,9 @@ import tornadofx.Controller
 
 class RentalController : Controller() {
 
-    fun getDetails(vypozicka: Vypozicka) {
-
-    }
 
     val rentals = TableModel {
-        Db.connection.nacitajVypozicky("", "", 10, it).onEach {
-            it.vozidlo = Db.connection.nacitajVozidla("where id=${it!!.vozidlo.id}", "", 2, 1).first()
-        }.map(::RentalModel)
+        Db.connection.nacitajVypozicky("", "", 10, it).map(::RentalModel)
     }
 
     init {

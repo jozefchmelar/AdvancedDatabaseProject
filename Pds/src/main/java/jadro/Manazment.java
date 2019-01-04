@@ -3,6 +3,7 @@ package jadro;
 import db.PdsConnection;
 import db.SQL;
 import model.*;
+import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
 import java.sql.PreparedStatement;
@@ -166,6 +167,32 @@ public class Manazment {
         return null;
     }
 
+    public Zakaznik nacitajOsobuAleboFirmu(Integer id) {
+        String osoba = "select id, kontakt, rod_cislo , meno , priezvisko from zakaznik join osoba on id  = rod_cislo where rod_cislo = " + id;
+        String firma = "select id, kontakt, ico       ,nazov , \"x\"      from zakaznik join osoba on id  = ico       where ico = " + id;
+
+        SQL.run(osoba + "\nUNION\n" + firma, (p) -> {
+            try {
+                if(p.getString(2).equals("x")){
+//                    return new Firma(p.getString("ico"),p.getString("nazov"));
+                }else{
+
+                }
+
+                while (p.next()) {
+                    Cennik cennik = new Cennik(p.getInt("ID"), p.getDouble("cena_den"),
+                            p.getDouble("poplatok"), p.getDate("platny_od"), p.getDate("platny_do"));
+//                    resultList.add(cennik);
+                }
+
+            } catch (Exception e) {
+
+            }
+
+        });
+        throw new NotImplementedException();
+    }
+
 
     //pouzitie: ArrayList<Faktura> test = (ArrayList<Faktura>) man.nacitajFaktury("where suma > 400", "zaplatena", 10, 1);
     public List<Faktura> nacitajFaktury(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
@@ -223,7 +250,8 @@ public class Manazment {
     }
 
     //pouzitie: ArrayList<Osoba> test = (ArrayList<Osoba>) man.nacitajZakaznikovOsoby("where meno = 'Michaela'", "priezvisko", 10, 1);
-    public List<Osoba> nacitajZakaznikovOsoby(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
+    public List<Osoba> nacitajZakaznikovOsoby(String vyrazWhere, String vyrazOrder, int velkostStranky,
+                                              int indexStranky) {
         String vyraz = "select * from" +
                 "( select o.*, rownum as rn " +
                 "from ( select * from osoba join zakaznik on osoba.rod_cislo = zakaznik.id " + vyrazWhere;
@@ -237,7 +265,8 @@ public class Manazment {
     }
 
     //pouzitie:  ArrayList<Firma> test = (ArrayList<Firma>) man.nacitajZakaznikovFirmy("where nazov like 'J%'", "nazov", 10, 1);
-    public List<Firma> nacitajZakaznikovFirmy(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
+    public List<Firma> nacitajZakaznikovFirmy(String vyrazWhere, String vyrazOrder, int velkostStranky,
+                                              int indexStranky) {
         String vyraz = "select * from" +
                 "( select f.*, rownum as rn " +
                 "from ( select * from firma join zakaznik on firma.ico = zakaznik.id " + vyrazWhere;

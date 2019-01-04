@@ -10,7 +10,6 @@ class MaintanceModel : ItemViewModel<Udrzba> {
 
     val pocetKM = bind { item?.pocetKM?.toString()?.toProperty() ?: "0.0".toProperty()}
     val cena = bind { item?.cena?.toString()?.toProperty() ?: "0.0".toProperty()}
-    //val cena = bind(Udrzba::getPocetKM)
     val datumOD = bind(Udrzba::getDatumOD)
     val datumDO = bind(Udrzba::getDatumDO)
     val popis   = bind(Udrzba::getPopis)

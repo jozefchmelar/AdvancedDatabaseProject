@@ -32,7 +32,7 @@ class RentalView : View("Rental") {
                     onSelectionChange {
                         val selected = it?.item
                         if(selected!=null){
-                            controller.getDetails(selected)
+                         //   controller.getDetails(selected)
                         }
                     }
                     smartResize()

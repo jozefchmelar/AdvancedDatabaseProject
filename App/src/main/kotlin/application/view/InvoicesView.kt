@@ -26,13 +26,25 @@ class InvoicesView : View("Invoices") {
                 column("Created", InvoiceModel::datumVystavenia).apply { isSortable = false }
                 column("Paid", InvoiceModel::datumZaplatenia).apply { isSortable = false }
                 column("Price", InvoiceModel::suma).apply { isSortable = false }
+                column("Contact", InvoiceModel::vypozicka) {
+                    isSortable = false
+                    converter(Conv { it.zakaznik.kontakt })
+                }
+                column("Car SPZ", InvoiceModel::car) {
+                    converter(Conv { it.spz })
+                    isSortable = false
+                }
+                column("Car ", InvoiceModel::car) {
+                    converter(Conv { it.znacka })
+                    isSortable = false
+                }
                 bindSelected(selectedInvoice)
             }
             vgrow = Priority.ALWAYS
             hgrow = Priority.ALWAYS
         }
         right = vbox {
-//            label(selectedInvoice)
+            //            label(selectedInvoice)
         }
     }
 }
