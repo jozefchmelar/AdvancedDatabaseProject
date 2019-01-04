@@ -1,9 +1,12 @@
 package jadro;
 
+import db.PdsConnection;
 import db.SQL;
 import model.*;
 
 import javax.swing.*;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,12 +111,21 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) v ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
+        vyraz += " ) v ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 
-    public void nacitajCenniky(String vyrazWhere) {
-        ArrayList<Cennik> zoznamCennikov = SQL.runQueryToList("Select * from cennik " + vyrazWhere);
+    public List<Cennik> nacitajCenniky(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
+        String vyraz = "select * from" +
+                "( select c.*, rownum as rn " +
+                "from ( select * from cennik " + vyrazWhere;
+        if (vyrazOrder.equals("")) {
+            vyraz += " order by platny_od";
+        } else {
+            vyraz += " order by " + vyrazOrder;
+        }
+        vyraz += " ) c ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
+        return SQL.runQueryToList(vyraz);
     }
 
     //pouzitie:
@@ -121,14 +133,33 @@ public class Manazment {
     public List<Vypozicka> nacitajVypozicky(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
         String vyraz = "select * from" +
                 "( select v.*, rownum as rn " +
-                "from ( select * from vypozicka " + vyrazWhere;
+                "from ( select * from vypozicka join vozidlo on vypozicka.id_vozidla = vozidlo.id join zakaznik on vypozicka.id_zakaznika = zakaznik.id " + vyrazWhere;
         if (vyrazOrder.equals("")) {
-            vyraz += " order by od";
+            vyraz += " order by vypozicka.od";
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) v ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
-        return SQL.runQueryToList(vyraz);
+        vyraz += " ) v ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
+        ResultSet rs = SQL.runToResultSet(vyraz);
+        if (rs != null) {
+            ArrayList<Vypozicka> zoznamVypoziciek = new ArrayList<>();
+            try {
+                while (rs.next()) {
+                    Vypozicka vypozicka = new Vypozicka(rs.getInt("id"), new Vozidlo(rs.getInt("id_vozidla")),
+                            new Zakaznik(rs.getString("id_zakaznika")), rs.getDate("od"), rs.getDate("do"));
+                    Vozidlo vozidlo = new Vozidlo(rs.getInt("id_vozidla"), new Cennik(rs.getInt("id_cennika")),
+                            rs.getString("spz"), rs.getString("znacka"), rs.getString("typ"), null, rs.getDate("datum_vyradenia")); //TODO fotka
+                    Zakaznik zakaznik = new Zakaznik(rs.getString("id_zakaznika"), rs.getString("kontakt"));
+                    vypozicka.setVozidlo(vozidlo);
+                    vypozicka.setZakaznik(zakaznik);
+                    zoznamVypoziciek.add(vypozicka);
+                }
+                return zoznamVypoziciek;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 
 
@@ -136,19 +167,55 @@ public class Manazment {
     public List<Faktura> nacitajFaktury(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
         String vyraz = "select * from" +
                 "( select f.*, rownum as rn " +
-                "from ( select * from faktura " + vyrazWhere;
+                "from ( select * from faktura join vypozicka on faktura.id_vypozicky = vypozicka.id join vozidlo on vypozicka.id_vozidla = vozidlo.id join zakaznik on vypozicka.id_zakaznika = zakaznik.id "
+                + vyrazWhere;
         if (vyrazOrder.equals("")) {
             vyraz += " order by zaplatena";
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) f ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
-        return SQL.runQueryToList(vyraz);
+        vyraz += " ) f ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
+        ResultSet rs = SQL.runToResultSet(vyraz);
+        if (rs != null) {
+            ArrayList<Faktura> zoznamFaktur = new ArrayList<>();
+            try {
+                while (rs.next()) {
+                    Faktura faktura = new Faktura(rs.getInt("id"), new Vypozicka(rs.getInt("id_vypozicky")),
+                            rs.getDouble("suma"), rs.getDate("vystavena"), rs.getDate("zaplatena"));
+                    Vypozicka vypozicka = new Vypozicka(rs.getInt("id_vypozicky"), new Vozidlo(rs.getInt("id_vozidla")),
+                            new Zakaznik(rs.getString("id_zakaznika")), rs.getDate("od"), rs.getDate("do"));
+                    Vozidlo vozidlo = new Vozidlo(rs.getInt("id_vozidla"), new Cennik(rs.getInt("id_cennika")),
+                            rs.getString("spz"), rs.getString("znacka"), rs.getString("typ"), null, rs.getDate("datum_vyradenia")); //TODO fotka
+                    Zakaznik zakaznik = new Zakaznik(rs.getString("id_zakaznika"), rs.getString("kontakt"));
+                    vypozicka.setVozidlo(vozidlo);
+                    vypozicka.setZakaznik(zakaznik);
+                    faktura.setVypozicka(vypozicka);
+                    zoznamFaktur.add(faktura);
+                }
+                return zoznamFaktur;
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
+        //return SQL.runQueryToList(vyraz);
     }
 
     //TODO, pre prehladavanie vsetkych udrzieb bude asi treba spravil nejaku proceduru v db. Pripadne to nerobit a robit iba prehladavanie udrzieb konkretneho vozidla
-    public void nacitajUdrzby(String vyrazWhere) {
-        ArrayList<Udrzba> zoznamUdrzieb = SQL.runQueryToList("Select * from udrzba " + vyrazWhere);
+    //vrati zoznam vyhovujucich udrzieb v podobe zoznamu listu vozidiel. Kazde z tych vozidiel obsahuje jednu udrzbu, ktora je vysledkom tohto dotazu
+    //ak chceme prehladat iba udrzby konkretneho vozidla, tak vo where jednoducho definujeme spz tohto vozidla
+    //pouzitie: ArrayList<Vozidlo> test = (ArrayList<Vozidlo>) man.nacitajUdrzby("where spz = 'SN092HY' and km > 10000", "km", 2, 1);
+    public List<Vozidlo> nacitajUdrzby(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
+        String vyraz = "select * from " +
+                "( select o.*, rownum as rn " +
+                "from ( select a.*, c.id, c.id_cennika, c.spz, c.znacka, c.typ, c.fotka, c.datum_vyradenia from vozidlo c cross join table(c.udrzba) a " + vyrazWhere;
+        if (vyrazOrder.equals("")) {
+            vyraz += " order by od";
+        } else {
+            vyraz += " order by " + vyrazOrder;
+        }
+        vyraz += " ) o ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
+        return SQL.runQueryToList(vyraz);
     }
 
     //pouzitie: ArrayList<Osoba> test = (ArrayList<Osoba>) man.nacitajZakaznikovOsoby("where meno = 'Michaela'", "priezvisko", 10, 1);
@@ -161,7 +228,7 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) o ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
+        vyraz += " ) o ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 
@@ -175,7 +242,7 @@ public class Manazment {
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) f ) where rn between " + (indexStranky - 1) * velkostStranky + 1 + " and " + velkostStranky * indexStranky;
+        vyraz += " ) f ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 
@@ -214,9 +281,54 @@ public class Manazment {
      * Update
      * vrati pocet riadkov, v pripade erroru vrati -1
      */
+    //pouzitie: int vysl = man.updateVozidla("spz='test'", "spz='test2'");
     public int updateVozidla(String vyrazWhere, String vyrazSet) {
-        String vyraz = "update vozidlo set " + vyrazSet + " where " + vyrazWhere;
+        String vyraz = "Update vozidlo set " + vyrazSet + " Where " + vyrazWhere;
         return SQL.runUpdateQuery(vyraz);
     }
+
+    public int updateCenniky(String vyrazWhere, String vyrazSet) {
+        String vyraz = "Update cennik set " + vyrazSet + " Where " + vyrazWhere;
+        return SQL.runUpdateQuery(vyraz);
+    }
+
+    public int updateVypozicky(String vyrazWhere, String vyrazSet) {
+        String vyraz = "Update vypozicka set " + vyrazSet + " Where " + vyrazWhere;
+        return SQL.runUpdateQuery(vyraz);
+    }
+
+    public int updateFaktury(String vyrazWhere, String vyrazSet) {
+        String vyraz = "Update faktura set " + vyrazSet + " Where " + vyrazWhere;
+        return SQL.runUpdateQuery(vyraz);
+    }
+
+    //toto nie je otestovane, lebo ma stale lockuje db
+    //tu to bolo moc komplikovane, tak radsej takto cez objekty
+    public int updateOsoby(Osoba staraOsoba, Osoba novaOsoba) {
+        String vyraz = "";
+        //ci doslo k zmene PK
+        if (!staraOsoba.getRodCislo().equals(novaOsoba.getRodCislo())) {
+            //insertne sa novy zakaznik
+            Zakaznik novyZakaznik = new Zakaznik(novaOsoba.getRodCislo(), novaOsoba.getKontakt());
+            if (SQL.runInsertQuery(novyZakaznik) <= 0) {
+                return -1;
+            }
+            //update vsetkych child zaznamov
+            int kontrola = SQL.runUpdateQuery("Update vypozicka set id_zakaznika = '" + novaOsoba.getRodCislo() + "' where id_zakaznika = '" + staraOsoba.getRodCislo() + "'");
+            kontrola = SQL.runUpdateQuery("Update osoba set rod_cislo = '" + novaOsoba.getRodCislo() + "', meno = '" + novaOsoba.getMeno()
+                    + "', priezvisko = '" + novaOsoba.getPrizvisko() + "' where rod_cislo = '" + staraOsoba.getRodCislo() + "'");
+            //deletne sa stary zaznam
+            return SQL.runUpdateQuery("Delete from zakaznik where id = '" + staraOsoba.getRodCislo() + "'");
+        } else {
+            int kontrola = SQL.runUpdateQuery("Update zakaznik set kontakt = '" + novaOsoba.getKontakt() + "'");
+            return SQL.runUpdateQuery("Update osoba set meno = '" + novaOsoba.getMeno()
+                    + "', priezvisko = '" + novaOsoba.getPrizvisko() + "' where rod_cislo = '" + staraOsoba.getRodCislo() + "'");
+        }
+    }
+
+//    public int updateVozidla(String vyrazWhere, String vyrazSet) {
+//        String vyraz = "Update vozidlo set " + vyrazSet + " Where " + vyrazWhere;
+//        return SQL.runUpdateQuery(vyraz);
+//    }
 }
 
