@@ -9,19 +9,19 @@ class RentalModel : ItemViewModel<Vypozicka> {
     constructor() : super()
 
     val id       = bind(Vypozicka::getId)
-    val vozidlo  = bind(Vypozicka::getVozidlo )
-    val zakaznik = bind(Vypozicka::getZakaznik )
+    //val vozidlo  = bind(Vypozicka::getVozidlo )
+    //val zakaznik = bind(Vypozicka::getZakaznik )
     val datumOD  = bind(Vypozicka::getDatumOD )
     val datumDO  = bind(Vypozicka::getDatumDO )
 
     override fun onCommit() {
         super.onCommit()
-        item = Vypozicka(
-                id.value,
-                vozidlo.value,
-                zakaznik.value,
-                datumOD.value,
-                datumDO.value
-        )
+//        item = Vypozicka(
+//                id.value,
+//                vozidlo.value,
+//                zakaznik.value,
+//                datumOD.value,
+//                datumDO.value
+//        )
     }
 }

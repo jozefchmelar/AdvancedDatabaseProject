@@ -16,7 +16,7 @@ class CompanyModel : ItemViewModel<Firma> {
     override fun onCommit() {
         super.onCommit()
         item = Firma(
-                id.value,
+                "0",
                 kontakt.value,
                 ico.value,
                 nazov.value
