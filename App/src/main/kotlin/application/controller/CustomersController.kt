@@ -17,11 +17,14 @@ class CustomersController : Controller() {
     }
 
     fun savePerson(item: Osoba) {
+        Db.connection.pridajOsobu(item)
+        people.current()
 
     }
 
     fun saveCompany(item: Firma) {
-
+        Db.connection.pridajFirmu(item)
+        companies.current()
     }
 }
 
@@ -31,16 +34,17 @@ class TableModel<T>(private val getCurrent: (Int) -> List<T>) {
     val page = SimpleIntegerProperty(1)
 
     fun more() {
+        current(page.value + 1)
         page.set(page.value + 1)
-        current()
     }
 
     fun less() {
         if (page.value == 1) return
+        current(page.value - 1)
         page.set(page.value - 1)
-        current()
+
     }
 
-    fun current() = getCurrent(page.value).let(list::setAll)
+    fun current(apage:Int =1) = runAsync { getCurrent(apage).let(list::setAll) }
 
 }

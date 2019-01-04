@@ -2,12 +2,15 @@ package application.controller
 
 import application.model.*
 import javafx.collections.*
+import tornadofx.*
 
-class VehiclesController : MyController() {
-    val vehicles = FXCollections.observableArrayList<VehicleModel>()
+class VehiclesController : Controller() {
 
-    override fun get() {
-        vehicles.setAll(Db.connection.nacitajVozidla("","",25,1).map(::VehicleModel))
+    val vehicles = TableModel { Db.connection.nacitajVozidla("", "", 25, it)
+            .map(::VehicleModel) }
+
+    init {
+        vehicles.current()
     }
 }
 

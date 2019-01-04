@@ -14,7 +14,7 @@ class VehicleModel : ItemViewModel<Vozidlo> {
     val znacka = bind(Vozidlo::getZnacka)
     val typ = bind(Vozidlo::getTyp)
     val fotkaCesta = bind(Vozidlo::getFotkaCesta)
-    val udrzby = bind(Vozidlo::getUdrzby)
+//    val udrzby = bind(Vozidlo::getUdrzby)
     val datum_vyradenia = bind(Vozidlo::getDatum_vyradenia)
 
     override fun onCommit() {

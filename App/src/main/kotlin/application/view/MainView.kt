@@ -1,6 +1,5 @@
 package application.view
 
-import application.controller.MyController
 import javafx.scene.control.TabPane
 import javafx.scene.layout.Priority
 import javafx.stage.*
@@ -8,7 +7,7 @@ import tornadofx.* // ktlint-disable
 
 class MainView : View("PDS") {
 
-    private val controller: MyController by inject()
+    private val controller: Controller by inject()
 
     override val root = borderpane {
         minWidth = 1000.0

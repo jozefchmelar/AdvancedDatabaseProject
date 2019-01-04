@@ -17,12 +17,12 @@ class CustomerPersonView : View("Person") {
 
         center {
             hbox {
-            paddingRight=24
+                paddingRight = 24
                 vbox {
                     addClass("card")
 
                     text("Persons").addClass("card-title")
-                    hgrow= Priority.ALWAYS
+                    hgrow = Priority.ALWAYS
                     tableviewpag(controller.people) {
                         smartResize()
                         column("First name", PersonModel::meno).apply { isSortable = false }
@@ -61,8 +61,8 @@ class CustomerPersonView : View("Person") {
                 hbox {
 
                     button("Get") {
-                        createdCustomer.commit()
-                        controller.savePerson(createdCustomer.item)
+                        action {   createdCustomer.commit()
+                       controller.savePerson(createdCustomer.item) }
                     }
                 }
             }

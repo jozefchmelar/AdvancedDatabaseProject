@@ -9,6 +9,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
+
+/*
+ TODO vkladanie osoby
+ */
 public class Manazment {
     private Cennik cennik;
     private Vozidlo vozidlo;

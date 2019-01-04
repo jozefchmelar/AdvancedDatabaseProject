@@ -4,6 +4,7 @@ import application.controller.*
 import application.model.*
 import javafx.geometry.*
 import javafx.scene.layout.*
+import tableviewpag
 import tornadofx.*
 
 class VehiclesView : View("Vehicles") {
@@ -13,11 +14,14 @@ class VehiclesView : View("Vehicles") {
         //   controller.get()
         padding = Insets(20.0)
 
-        center = borderpane {
-
-
-
+        center = vbox {
+            tableviewpag(controller.vehicles) {
+                column("spz", VehicleModel::spz)
+                column("znacka", VehicleModel::znacka)
+                column("typ", VehicleModel::typ)
+            }
         }
+
 
     }
 }

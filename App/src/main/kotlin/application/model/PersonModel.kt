@@ -13,8 +13,8 @@ class PersonModel : ItemViewModel<Osoba> {
     val rodCislo = bind(Osoba::getRodCislo)
     val meno = bind(Osoba::getMeno)
     val priezvisko = bind(Osoba::getPrizvisko)
-
     override fun onCommit() {
+
         super.onCommit()
         item = Osoba(
                 "0",
