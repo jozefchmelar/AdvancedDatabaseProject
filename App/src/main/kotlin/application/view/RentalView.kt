@@ -3,13 +3,15 @@ package application.view
 import application.controller.*
 import application.model.RentalModel
 import javafx.geometry.*
+import javafx.scene.control.*
 import javafx.scene.layout.*
+import javafx.util.*
 import tableviewpag
 import tornadofx.*
 
 class RentalView : View("Rental") {
     private val controller: RentalController by inject()
-
+    val selectedRental = RentalModel()
     override val root = borderpane {
         padding = Insets(20.0)
 
@@ -17,10 +19,22 @@ class RentalView : View("Rental") {
             tab("Rentals") {
                 tableviewpag(controller.rentals) {
                     column("id", RentalModel::id).apply { isSortable = false }
-//                    column("vozidlo", RentalModel::vozidlo).apply { isSortable = false }
-//                    column("zakaznik", RentalModel::zakaznik).apply { isSortable = false }
                     column("datumOD", RentalModel::datumOD).apply { isSortable = false }
                     column("datumDO", RentalModel::datumDO).apply { isSortable = false }
+                    column("SPZ", RentalModel::vozidlo).apply {
+                        isSortable = false
+                        converter(Conv { it.spz })
+                    }
+                    column("Brand", RentalModel::vozidlo).apply {
+                        isSortable = false
+                        converter(Conv { it.znacka })
+                    }
+                    onSelectionChange {
+                        val selected = it?.item
+                        if(selected!=null){
+                         //   controller.getDetails(selected)
+                        }
+                    }
                     smartResize()
                 }
             }
@@ -29,4 +43,15 @@ class RentalView : View("Rental") {
             }
         }
     }
+}
+
+class Conv<T>(val p: (T) -> String) : StringConverter<T>() {
+    override fun toString(`object`: T): String {
+        return p(`object`)
+    }
+
+    override fun fromString(string: String?): T {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }

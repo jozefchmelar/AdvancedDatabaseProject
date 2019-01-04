@@ -5,6 +5,8 @@ import model.*;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.function.Consumer;
 
 final public class SQL {
@@ -171,11 +173,18 @@ final public class SQL {
             } else if (data instanceof Udrzba) {
                 //TODO
             } else if (data instanceof Osoba) {
-                String query = "Insert into Zakaznik ( id, kontakt ) Values (?,?)";
+                String query = "Insert into Zakaznik ( id, kontakt ) Values ("+ String.join(",",Arrays.asList(
+                        ((Osoba) data).getRodCislo(),
+                        ((Osoba) data).getKontakt()
+                )) +")"  ;
                 ps = ((Zakaznik) data).insertStatementZakaznik(PdsConnection.getInstance().getConnection().prepareStatement(query));
                 int result = ps.executeUpdate();
                 if (result > 0) {
-                    query = "Insert into Osoba ( rod_cislo, meno, priezvisko ) Values (?,?,?)";
+                    query = "Insert into Osoba ( rod_cislo, meno, priezvisko ) Values ("+ String.join(",",Arrays.asList(
+                            ((Osoba) data).getRodCislo(),
+                            ((Osoba) data).getMeno(),
+                            ((Osoba) data).getPrizvisko()
+                    )) +")"  ;
                     ps = ((Osoba) data).insertStatement(PdsConnection.getInstance().getConnection().prepareStatement(query));
                 } else {
                     return 0;

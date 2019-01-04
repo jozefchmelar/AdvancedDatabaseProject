@@ -56,13 +56,14 @@ class CustomerCompanyView : View("Company") {
                 }
                 hbox {
                     button("Get") {
-                        createdCompany.commit()
-                        controller.saveCompany(createdCompany.item)
+                        action {
+                            createdCompany.commit()
+                            controller.saveCompany(createdCompany.item)
+                        }
                     }
                 }
             }
         }
+
     }
-
 }
-
