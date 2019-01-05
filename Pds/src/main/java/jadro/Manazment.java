@@ -104,10 +104,6 @@ public class Manazment {
         return SQL.runInsertQuery(vozidlo);
     }
 
-    public int pridajUdrzbu(Udrzba udrzba) {
-        return SQL.runInsertQuery(udrzba);
-    }
-
     public int pridajVypozicku(Vypozicka vypozicka) {
         return SQL.runInsertQuery(vypozicka);
     }
@@ -122,6 +118,20 @@ public class Manazment {
 
     public int pridajFirmu(Firma firma) {
         return SQL.runInsertQuery(firma);
+    }
+
+    public int pridajUdrzbu(Vozidlo vozidlo, Udrzba udrzba) {
+        String vyraz = "";
+        if (vozidlo.getUdrzby().isEmpty()) {
+            vyraz += "update vozidlo set udrzba = udrzby(t_udrzba( " + udrzba.getPocetKM() + ", " + udrzba.getCena() + ", to_date('"
+                    + new java.sql.Date(udrzba.getDatumOD().getTime()).toString() + "', 'yyyy-mm-dd'), to_date('"
+                    + new java.sql.Date(udrzba.getDatumDO().getTime()).toString() + "', 'yyyy-mm-dd'), '" + udrzba.getPopis() + "')) where spz = '" + vozidlo.getSpz() + "'";
+        } else {
+            vyraz += "insert into table (select v.udrzba from vozidlo v where v.spz = '" + vozidlo.getSpz() + "') u values (t_udrzba( " + udrzba.getPocetKM() + ", " + udrzba.getCena() + ", to_date('"
+                    + new java.sql.Date(udrzba.getDatumOD().getTime()).toString() + "', 'yyyy-mm-dd'), to_date('"
+                    + new java.sql.Date(udrzba.getDatumDO().getTime()).toString() + "', 'yyyy-mm-dd'), '" + udrzba.getPopis() + "'))";
+        }
+        return SQL.runUpdateQuery(vyraz);
     }
 
     /*
@@ -194,9 +204,9 @@ public class Manazment {
 
         SQL.run(osoba + "\nUNION\n" + firma, (p) -> {
             try {
-                if(p.getString(2).equals("x")){
+                if (p.getString(2).equals("x")) {
 //                    return new Firma(p.getString("ico"),p.getString("nazov"));
-                }else{
+                } else {
 
                 }
 
