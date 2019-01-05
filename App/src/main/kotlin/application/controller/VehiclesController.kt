@@ -13,7 +13,7 @@ class VehiclesController : Controller() {
     }
 
     fun newVehicle(item: Vozidlo?, pathToPhoto: String?) {
-//        Db.connection.pridajVozidlo()
+        Db.connection.pridajVozidlo()
     }
 
     val pricing = TableModel { Db.connection.nacitajCenniky("","",10,it).map(::PricingModel) }
