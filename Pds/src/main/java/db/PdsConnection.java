@@ -21,6 +21,7 @@ final public class PdsConnection {
     private PdsConnection() {
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
+            DriverManager.registerDriver(new oracle.jdbc.driver.OracleDriver());
             List<String> lines = Files.readAllLines(Paths.get("connection.txt"));
             connection = DriverManager.getConnection(lines.get(0), lines.get(1), lines.get(2));
         } catch (SQLException e) {

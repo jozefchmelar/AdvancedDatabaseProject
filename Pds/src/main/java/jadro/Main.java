@@ -2,6 +2,8 @@ package jadro;
 
 import db.SQL;
 import model.*;
+import oracle.xdb.XMLType;
+import org.w3c.dom.Document;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -21,9 +23,17 @@ public class Main {
 //            SQL.run("insert into test values(" + i + ")");
 //        }
 
-        SQL.run("select * from test", (row) -> {
+        SQL.run("select x.report_one from xml_reports x\n", (orset) -> {
+
             try {
-                System.out.println(row.getInt("ID"));
+
+                while (orset.next()) {
+                    // get the XMLType
+                    // get the XMLDocument as a string...
+                    System.out.println(orset.getString(1));
+                    //oracle.sql.CLOB clb = orset.getCLOB(1);
+
+                }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -68,7 +78,7 @@ public class Main {
         //int vysl = SQL.runInsertQuery(new Cennik(1234567893, 99, 999, new Date(), new Date()));
 
         //SQL.run("Insert into zakaznik values ('1234567893', 'lol')");
-       //int vysl = man.updateVozidla("spz='test'", "spz='test2'");
+        //int vysl = man.updateVozidla("spz='test'", "spz='test2'");
 //        ArrayList<Firma> test = (ArrayList<Firma>) man.nacitajZakaznikovFirmy("where nazov like 'J%'", "nazov", 10, 1);
         //int result = man.vymazVozidla("spz = 'test'");
         int pom = 10;

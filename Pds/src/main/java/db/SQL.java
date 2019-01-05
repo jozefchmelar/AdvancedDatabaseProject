@@ -2,6 +2,8 @@ package db;
 
 import jadro.*;
 import model.*;
+import oracle.jdbc.OraclePreparedStatement;
+import oracle.jdbc.OracleResultSet;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -11,10 +13,12 @@ import java.util.function.Consumer;
 
 final public class SQL {
 
-    public static void run(String query, Consumer<ResultSet> onResult) {
+    public static void run(String query, Consumer<OracleResultSet> onResult) {
         try {
-            PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(query);
-            ResultSet p = ps.executeQuery();
+            Connection connection = PdsConnection.getInstance().getConnection();
+            OraclePreparedStatement stmt = (OraclePreparedStatement) connection.prepareStatement(query);
+            ResultSet rs = stmt.executeQuery();
+            OracleResultSet p = (OracleResultSet) rs;
             if (onResult != null) {
                 while (p.next()) {
                     onResult.accept(p);

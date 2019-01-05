@@ -12,6 +12,8 @@ class VehicleModel : ItemViewModel<Vozidlo> {
     constructor(item: Vozidlo) : super(item)
     constructor() : super()
 
+    val photoPath = SimpleStringProperty()
+
     val id = bind(Vozidlo::getId)
     val cennik = bind(Vozidlo::getCennik)
     val spz = bind(Vozidlo::getSpz)

@@ -2,11 +2,14 @@ import application.controller.*
 import javafx.collections.*
 import javafx.event.*
 import javafx.scene.control.*
+import javafx.scene.layout.*
 import tornadofx.*
 
 fun <T> EventTarget.tableviewpag(items: TableModel<T>, op: TableView<T>.() -> Unit = {}) = vbox {
-
+    vgrow = Priority.ALWAYS
     tableview(items.list) {
+        vgrow = Priority.ALWAYS
+
         op()
     }
     borderpane {

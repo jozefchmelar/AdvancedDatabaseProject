@@ -26,7 +26,7 @@ class MainView : View("PDS") {
             tab(InvoicesView::class)
             tab(PricingView::class)
             tab(RentalView::class)
-            tab(VehiclesView::class)
+            tab(AllVehicels::class)
         }
 
     }.also { primaryStage.setOnCloseRequest { System.exit(0) } }
