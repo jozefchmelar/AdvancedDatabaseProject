@@ -3,7 +3,6 @@ package jadro;
 import db.PdsConnection;
 import db.SQL;
 import model.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
 import java.sql.PreparedStatement;
@@ -225,7 +224,7 @@ public class Manazment {
             }
 
         });
-        throw new NotImplementedException();
+        throw new ArrayIndexOutOfBoundsException();
     }
 
 

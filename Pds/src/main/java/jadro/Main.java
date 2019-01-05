@@ -20,14 +20,14 @@ public class Main {
 //        for (int i = 0; i < 10; i++) {
 //            SQL.run("insert into test values(" + i + ")");
 //        }
-//
-//        SQL.run("select * from test", (row) -> {
-//            try {
-//                System.out.println(row.getInt("ID"));
-//            } catch (SQLException e) {
-//                e.printStackTrace();
-//            }
-//        });
+
+        SQL.run("select * from test", (row) -> {
+            try {
+                System.out.println(row.getInt("ID"));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
 
 
 //        ArrayList<Integer> skuska = SQL.runQueryToList("Select * from test", PodporovaneTypy.STRING, "ID");

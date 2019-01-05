@@ -162,7 +162,7 @@ final public class SQL {
                 Vozidlo vozidlo = (Vozidlo) data;
                 String query = "Insert into Vozidlo Values (" + vozidlo.getId() + ", " + vozidlo.getCennik().getId() + ", '" + vozidlo.getSpz() + "', '"
                         + vozidlo.getZnacka() + "', '" + vozidlo.getTyp();
-                if (vozidlo.getFotkaCesta().isEmpty()) {
+                if (vozidlo.getFotkaCesta() == null) {
                     query += "', null ";
                 } else {
                     //TODO fotka
