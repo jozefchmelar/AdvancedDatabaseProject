@@ -159,32 +159,53 @@ final public class SQL {
                 String query = "Insert into Cennik ( id, cena_den, poplatok, platny_od, platny_do ) Values (?,?,?,?,?)";
                 ps = ((Cennik) data).insertStatement(PdsConnection.getInstance().getConnection().prepareStatement(query));
             } else if (data instanceof Vozidlo) {
-                //TODO
-                //String query = "Insert into Vozidlo ( id, id_cennika, spz, znacka, typ, fotka, udrzba ) Values (?,?,?,?,?,?,?)";
-                String pom = "insert into vozidlo(id, id_cennika, spz, znacka, typ, fotka, udrzba) values (555555555,444,'test','Opel','test',null,null)";
-                //ps = ((Vozidlo) data).insertStatement(PdsConnection.getInstance().getConnection().prepareStatement(query));
-                ps = PdsConnection.getInstance().getConnection().prepareStatement(pom);
+                Vozidlo vozidlo = (Vozidlo) data;
+                String query = "Insert into Vozidlo Values (" + vozidlo.getId() + ", " + vozidlo.getCennik().getId() + ", '" + vozidlo.getSpz() + "', '"
+                        + vozidlo.getZnacka() + "', '" + vozidlo.getTyp();
+                if (vozidlo.getFotkaCesta().isEmpty()) {
+                    query += "', null ";
+                } else {
+                    //TODO fotka
+                }
+                if (vozidlo.getUdrzby().isEmpty()) {
+                    query += ", null ";
+                } else {
+                    query += ", udrzby(";
+                    for (int i = 0; i < vozidlo.getUdrzby().size(); i++) {
+                        if (i != 0) {
+                            query += ", ";
+                        }
+                        query += "t_udrzba(" + vozidlo.getUdrzby().get(i).getPocetKM() + ", " + vozidlo.getUdrzby().get(i).getCena()
+                                + ", to_date('" + new java.sql.Date(vozidlo.getUdrzby().get(i).getDatumOD().getTime()).toString() + "', 'yyyy-mm-dd')" + ", to_date('" + new java.sql.Date(vozidlo.getUdrzby().get(i).getDatumDO().getTime()).toString()
+                                + "', 'yyyy-mm-dd')" + ", '" + vozidlo.getUdrzby().get(i).getPopis() + "')";
+                    }
+                    query += ")";
+                }
+                if (vozidlo.getDatum_vyradenia() == null) {
+                    query += ", null )";
+                } else {
+                    query += ", to_date('" + new java.sql.Date(vozidlo.getDatum_vyradenia().getTime()).toString() + "', 'yyyy-mm-dd'))";
+                }
+                ps = PdsConnection.getInstance().getConnection().prepareStatement(query);
             } else if (data instanceof Vypozicka) {
                 String query = "Insert into Vypozicka ( id, id_vozidla, id_zakaznika, od, do ) Values (?,?,?,?,?)";
                 ps = ((Vypozicka) data).insertStatement(PdsConnection.getInstance().getConnection().prepareStatement(query));
             } else if (data instanceof Faktura) {
                 String query = "Insert into Faktura ( id, id_vypozicky, suma, vystavena, zaplatena ) Values (?,?,?,?,?)";
                 ps = ((Faktura) data).insertStatement(PdsConnection.getInstance().getConnection().prepareStatement(query));
-            } else if (data instanceof Udrzba) {
-                //TODO
             } else if (data instanceof Osoba) {
-                String query = "Insert into Zakaznik ( id, kontakt ) Values ("+ String.join(",",Arrays.asList(
+                String query = "Insert into Zakaznik ( id, kontakt ) Values (" + String.join(",", Arrays.asList(
                         ((Osoba) data).getRodCislo(),
                         ((Osoba) data).getKontakt()
-                )) +")"  ;
+                )) + ")";
                 ps = ((Zakaznik) data).insertStatementZakaznik(PdsConnection.getInstance().getConnection().prepareStatement(query));
                 int result = ps.executeUpdate();
                 if (result > 0) {
-                    query = "Insert into Osoba ( rod_cislo, meno, priezvisko ) Values ("+ String.join(",",Arrays.asList(
+                    query = "Insert into Osoba ( rod_cislo, meno, priezvisko ) Values (" + String.join(",", Arrays.asList(
                             ((Osoba) data).getRodCislo(),
                             ((Osoba) data).getMeno(),
                             ((Osoba) data).getPrizvisko()
-                    )) +")"  ;
+                    )) + ")";
                     ps = ((Osoba) data).insertStatement(PdsConnection.getInstance().getConnection().prepareStatement(query));
                 } else {
                     return 0;

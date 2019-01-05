@@ -123,6 +123,20 @@ public class Manazment {
         return SQL.runInsertQuery(firma);
     }
 
+    public int pridajUdrzbu(Vozidlo vozidlo, Udrzba udrzba) {
+        String vyraz = "";
+        if (vozidlo.getUdrzby().isEmpty()) {
+            vyraz += "update vozidlo set udrzba = udrzby(t_udrzba( " + udrzba.getPocetKM() + ", " + udrzba.getCena() + ", to_date('"
+                    + new java.sql.Date(udrzba.getDatumOD().getTime()).toString() + "', 'yyyy-mm-dd'), to_date('"
+                    + new java.sql.Date(udrzba.getDatumDO().getTime()).toString() + "', 'yyyy-mm-dd'), '" + udrzba.getPopis() + "')) where spz = '" + vozidlo.getSpz() + "'";
+        } else {
+            vyraz += "insert into table (select v.udrzba from vozidlo v where v.spz = '" + vozidlo.getSpz() + "') u values (t_udrzba( " + udrzba.getPocetKM() + ", " + udrzba.getCena() + ", to_date('"
+                    + new java.sql.Date(udrzba.getDatumOD().getTime()).toString() + "', 'yyyy-mm-dd'), to_date('"
+                    + new java.sql.Date(udrzba.getDatumDO().getTime()).toString() + "', 'yyyy-mm-dd'), '" + udrzba.getPopis() + "'))";
+        }
+        return SQL.runUpdateQuery(vyraz);
+    }
+
     /*
      * Nacita mnoziny dat
      */
@@ -187,31 +201,31 @@ public class Manazment {
         return null;
     }
 
-//    public Zakaznik nacitajOsobuAleboFirmu(Integer id) {
-//        String osoba = "select id, kontakt, rod_cislo , meno , priezvisko from zakaznik join osoba on id  = rod_cislo where rod_cislo = " + id;
-//        String firma = "select id, kontakt, ico       ,nazov , \"x\"      from zakaznik join osoba on id  = ico       where ico = " + id;
-//
-//        SQL.run(osoba + "\nUNION\n" + firma, (p) -> {
-//            try {
-//                if(p.getString(2).equals("x")){
-////                    return new Firma(p.getString("ico"),p.getString("nazov"));
-//                }else{
-//
-//                }
-//
-//                while (p.next()) {
-//                    Cennik cennik = new Cennik(p.getInt("ID"), p.getDouble("cena_den"),
-//                            p.getDouble("poplatok"), p.getDate("platny_od"), p.getDate("platny_do"));
-////                    resultList.add(cennik);
-//                }
-//
-//            } catch (Exception e) {
-//
-//            }
-//
-//        });
-//        throw new NotImplementedException();
-//    }
+    public Zakaznik nacitajOsobuAleboFirmu(Integer id) {
+        String osoba = "select id, kontakt, rod_cislo , meno , priezvisko from zakaznik join osoba on id  = rod_cislo where rod_cislo = " + id;
+        String firma = "select id, kontakt, ico       ,nazov , \"x\"      from zakaznik join osoba on id  = ico       where ico = " + id;
+
+        SQL.run(osoba + "\nUNION\n" + firma, (p) -> {
+            try {
+                if(p.getString(2).equals("x")){
+//                    return new Firma(p.getString("ico"),p.getString("nazov"));
+                }else{
+
+                }
+
+                while (p.next()) {
+                    Cennik cennik = new Cennik(p.getInt("ID"), p.getDouble("cena_den"),
+                            p.getDouble("poplatok"), p.getDate("platny_od"), p.getDate("platny_do"));
+//                    resultList.add(cennik);
+                }
+
+            } catch (Exception e) {
+
+            }
+
+        });
+        throw new NotImplementedException();
+    }
 
 
     //pouzitie: ArrayList<Faktura> test = (ArrayList<Faktura>) man.nacitajFaktury("where suma > 400", "zaplatena", 10, 1);
