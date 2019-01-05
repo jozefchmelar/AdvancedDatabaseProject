@@ -1,17 +1,13 @@
 package jadro;
 
-import db.PdsConnection;
 import db.SQL;
 import model.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 /*
@@ -215,13 +211,11 @@ public class Manazment {
                             p.getDouble("poplatok"), p.getDate("platny_od"), p.getDate("platny_do"));
 //                    resultList.add(cennik);
                 }
-
-            } catch (Exception e) {
-
+            }  catch (SQLException e) {
+                e.printStackTrace();
             }
-
         });
-        throw new NotImplementedException();
+        return null;
     }
 
 
