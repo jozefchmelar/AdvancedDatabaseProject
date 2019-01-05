@@ -22,6 +22,7 @@ class VehiclesView : View("Vehicles") {
 
             tableviewpag(controller.vehicles) {
 
+                column("id", VehicleModel::id)
                 column("spz", VehicleModel::spz)
                 column("znacka", VehicleModel::znacka)
                 column("typ", VehicleModel::typ)
@@ -41,6 +42,9 @@ class VehiclesView : View("Vehicles") {
                 column("datumDO", MaintanceModel::datumDO)
                 column("popis", MaintanceModel::popis)
                 smartResize()
+            }
+
+            imageview(selectedVehicle.select { it.fotkaCesta }){
 
             }
         }

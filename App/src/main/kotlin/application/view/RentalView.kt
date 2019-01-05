@@ -46,8 +46,8 @@ class RentalView : View("Rental") {
 }
 
 class Conv<T>(val p: (T) -> String) : StringConverter<T>() {
-    override fun toString(`object`: T): String {
-        return p(`object`)
+    override fun toString(`object`: T?): String {
+        return `object`?.let { p(it) } ?: "N/A"
     }
 
     override fun fromString(string: String?): T {

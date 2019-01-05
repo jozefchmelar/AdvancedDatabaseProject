@@ -1,5 +1,7 @@
 package model;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.Date;
@@ -39,6 +41,7 @@ public class Vypozicka {
         this.vozidlo = vozidlo;
     }
 
+    @Nullable
     public Zakaznik getZakaznik() {
         return zakaznik;
     }

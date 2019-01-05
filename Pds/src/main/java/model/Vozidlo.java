@@ -1,5 +1,6 @@
 package model;
 
+import java.sql.Blob;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -11,7 +12,7 @@ public class Vozidlo {
     private String spz;
     private String znacka;
     private String typ;
-    private String fotkaCesta;
+    private Blob fotkaCesta;
     private ArrayList<Udrzba> udrzby;
     private Date datum_vyradenia;
 
@@ -19,13 +20,24 @@ public class Vozidlo {
         this.id = id;
     }
 
-    public Vozidlo(int id, Cennik cennik, String spz, String znacka, String typ, String fotkaCesta, Date datum_vyradenia) {
+    public Vozidlo(int id, Cennik cennik, String spz, String znacka, String typ, Blob fotkaCesta, Date datum_vyradenia) {
         this.id = id;
         this.cennik = cennik;
         this.spz = spz;
         this.znacka = znacka;
         this.typ = typ;
         this.fotkaCesta = fotkaCesta;
+        this.udrzby = new ArrayList<>();
+        this.datum_vyradenia = datum_vyradenia;
+    }
+
+    public Vozidlo(int id, Cennik cennik, String spz, String znacka, String typ, Date datum_vyradenia) {
+        this.id = id;
+        this.cennik = cennik;
+        this.spz = spz;
+        this.znacka = znacka;
+        this.typ = typ;
+        this.fotkaCesta = null;
         this.udrzby = new ArrayList<>();
         this.datum_vyradenia = datum_vyradenia;
     }
@@ -70,11 +82,11 @@ public class Vozidlo {
         this.typ = typ;
     }
 
-    public String getFotkaCesta() {
+    public Blob getFotkaCesta() {
         return fotkaCesta;
     }
 
-    public void setFotkaCesta(String fotkaCesta) {
+    public void setFotkaCesta(Blob fotkaCesta) {
         this.fotkaCesta = fotkaCesta;
     }
 
