@@ -1,24 +1,28 @@
 package db;
 
-import jadro.*;
+import jadro.PodporovaneTypy;
 import model.*;
 import oracle.jdbc.OraclePreparedStatement;
 import oracle.jdbc.OracleResultSet;
 
+import org.w3c.dom.Document;
+
+import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.function.Consumer;
 
 final public class SQL {
 
-    public static void run(String query, Consumer<OracleResultSet> onResult) {
+    public static void run(String query, Consumer<ResultSet> onResult) {
         try {
-            Connection connection = PdsConnection.getInstance().getConnection();
-            OraclePreparedStatement stmt = (OraclePreparedStatement) connection.prepareStatement(query);
-            ResultSet rs = stmt.executeQuery();
-            OracleResultSet p = (OracleResultSet) rs;
+            PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(query);
+            ResultSet p = ps.executeQuery();
+            p.next();
+            System.out.println(p.getSQLXML("report_one").getString());
             if (onResult != null) {
                 while (p.next()) {
                     onResult.accept(p);
@@ -114,7 +118,23 @@ final public class SQL {
                     resultList = new ArrayList<Vozidlo>();
                     while (p.next()) {
                         Vozidlo vozidlo = new Vozidlo(p.getInt("id"), new Cennik(p.getInt("id_cennika")),
-                                p.getString("spz"), p.getString("znacka"), p.getString("typ"), p.getBlob("fotka"), p.getDate("datum_vyradenia"));
+                                p.getString("spz"), p.getString("znacka"), p.getString("typ"), null, p.getDate("datum_vyradenia"));
+
+                        InputStream is = p.getBinaryStream("fotka");
+                        if (is != null) {
+                            String nazovFotky = vozidlo.getSpz();
+                            nazovFotky = nazovFotky.replaceAll("\\s+","");
+                            nazovFotky += ".jpg";
+                            File image = new File("fotky/" + nazovFotky);
+                            FileOutputStream fos = new FileOutputStream(image);
+                            byte[] buffer = new byte[1];
+                            while (is.read(buffer) > 0) {
+                                fos.write(buffer);
+                            }
+                            fos.close();
+                            vozidlo.setFotkaCesta(nazovFotky);
+                        }
+
                         Array array = p.getArray("udrzba");
                         if (array != null) {
                             Object[] zoznamUdrzieb = (Object[]) array.getArray();
@@ -151,6 +171,10 @@ final public class SQL {
             return resultList;
         } catch (SQLException e) {
             e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         throw new IllegalStateException();
     }
@@ -163,34 +187,56 @@ final public class SQL {
                 String query = "Insert into Cennik ( id, cena_den, poplatok, platny_od, platny_do ) Values (?,?,?,?,?)";
                 ps = ((Cennik) data).insertStatement(PdsConnection.getInstance().getConnection().prepareStatement(query));
             } else if (data instanceof Vozidlo) {
+                String vyraz = "insert into vozidlo values(?,?,?,?,?,?,";
                 Vozidlo vozidlo = (Vozidlo) data;
-                String query = "Insert into Vozidlo Values (" + vozidlo.getId() + ", " + vozidlo.getCennik().getId() + ", '" + vozidlo.getSpz() + "', '"
-                        + vozidlo.getZnacka() + "', '" + vozidlo.getTyp();
-                if (vozidlo.getFotkaCesta() == null) {
-                    query += "', null ";
-                } else {
-                    //TODO fotka
-                }
-                if (vozidlo.getUdrzby().isEmpty()) {
-                    query += ", null ";
-                } else {
-                    query += ", udrzby(";
-                    for (int i = 0; i < vozidlo.getUdrzby().size(); i++) {
-                        if (i != 0) {
-                            query += ", ";
+
+                if (!vozidlo.getUdrzby().isEmpty()) {
+                    vyraz += "udrzby(";
+                    for (Udrzba u : vozidlo.getUdrzby()) {
+                        if (u == vozidlo.getUdrzby().get(0)) {
+                            vyraz += "t_udrzba(?,?,?,?,?)";
+                        } else {
+                            vyraz += ",t_udrzba(?,?,?,?,?)";
                         }
-                        query += "t_udrzba(" + vozidlo.getUdrzby().get(i).getPocetKM() + ", " + vozidlo.getUdrzby().get(i).getCena()
-                                + ", to_date('" + new java.sql.Date(vozidlo.getUdrzby().get(i).getDatumOD().getTime()).toString() + "', 'yyyy-mm-dd')" + ", to_date('" + new java.sql.Date(vozidlo.getUdrzby().get(i).getDatumDO().getTime()).toString()
-                                + "', 'yyyy-mm-dd')" + ", '" + vozidlo.getUdrzby().get(i).getPopis() + "')";
                     }
-                    query += ")";
-                }
-                if (vozidlo.getDatum_vyradenia() == null) {
-                    query += ", null )";
+                    vyraz += ")";
                 } else {
-                    query += ", to_date('" + new java.sql.Date(vozidlo.getDatum_vyradenia().getTime()).toString() + "', 'yyyy-mm-dd'))";
+                    vyraz += "?";
                 }
-                ps = PdsConnection.getInstance().getConnection().prepareStatement(query);
+                vyraz += ",?)";
+
+                ps = PdsConnection.getInstance().getConnection().prepareStatement(vyraz);
+                ps.setInt(1, vozidlo.getId());
+                ps.setInt(2, vozidlo.getCennik().getId());
+                ps.setString(3, vozidlo.getSpz());
+                ps.setString(4, vozidlo.getZnacka());
+                ps.setString(5, vozidlo.getTyp());
+                if (vozidlo.getFotkaCesta().equals("")) {
+                    ps.setBinaryStream(6, null);
+                } else {
+                    File imgfile = new File(vozidlo.getFotkaCesta());
+                    FileInputStream fin = new FileInputStream(imgfile);
+                    ps.setBinaryStream(6, fin, (int) imgfile.length());
+                }
+                int counter = 7;
+                if (vozidlo.getUdrzby().isEmpty()) {
+                    ps.setNull(counter, Types.ARRAY, "UDRZBY");
+                    counter++;
+                } else {
+                    for (Udrzba u : vozidlo.getUdrzby()) {
+                        ps.setLong(counter,u.getPocetKM());
+                        counter++;
+                        ps.setDouble(counter,u.getCena());
+                        counter++;
+                        ps.setDate(counter, new java.sql.Date(u.getDatumOD().getTime()));
+                        counter++;
+                        ps.setDate(counter, new java.sql.Date(u.getDatumDO().getTime()));
+                        counter++;
+                        ps.setString(counter, u.getPopis());
+                        counter++;
+                    }
+                }
+                ps.setDate(counter, new java.sql.Date(vozidlo.getDatum_vyradenia().getTime()));
             } else if (data instanceof Vypozicka) {
                 String query = "Insert into Vypozicka ( id, id_vozidla, id_zakaznika, od, do ) Values (?,?,?,?,?)";
                 ps = ((Vypozicka) data).insertStatement(PdsConnection.getInstance().getConnection().prepareStatement(query));
@@ -228,9 +274,10 @@ final public class SQL {
                 String query = "Insert into Zakaznik ( id, kontakt ) Values (?,?)";
                 ps = ((Zakaznik) data).insertStatementZakaznik(PdsConnection.getInstance().getConnection().prepareStatement(query));
             }
-            int vysl = ps.executeUpdate();
-            return vysl;
+            return ps.executeUpdate();
         } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
         return -1;
@@ -257,4 +304,24 @@ final public class SQL {
         }
         return null;
     }
+
+//    public static void testxml(String query) {
+//        try {
+//            PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(query);
+//            OraclePreparedStatement ops = (OraclePreparedStatement) ps;
+//            ResultSet rs = ops.executeQuery();
+//            OracleResultSet ors = (OracleResultSet) rs;
+//            Document xml_doc = null;
+//            while (ors.next()) {
+//                XMLType poxml = XMLType.createXML(ors.getOPAQUE("report_one"));
+//                //print the full xmltype
+//                System.out.println(poxml.getStringVal());
+//                //below method is deprecated
+//                //xml_column = (Document)poxml.getDOM();
+//                xml_doc = (Document)poxml.getDocument();
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//    }
 }

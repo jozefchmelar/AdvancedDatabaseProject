@@ -1,16 +1,13 @@
 package jadro;
 
-import db.PdsConnection;
 import db.SQL;
 import model.*;
 
 import javax.swing.*;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 
 /*
@@ -101,10 +98,6 @@ public class Manazment {
 
     public int pridajVozidlo(Vozidlo vozidlo) {
         return SQL.runInsertQuery(vozidlo);
-    }
-
-    public int pridajUdrzbu(Udrzba udrzba) {
-        return SQL.runInsertQuery(udrzba);
     }
 
     public int pridajVypozicku(Vypozicka vypozicka) {
@@ -207,9 +200,9 @@ public class Manazment {
 
         SQL.run(osoba + "\nUNION\n" + firma, (p) -> {
             try {
-                if(p.getString(2).equals("x")){
+                if (p.getString(2).equals("x")) {
 //                    return new Firma(p.getString("ico"),p.getString("nazov"));
-                }else{
+                } else {
 
                 }
 
@@ -218,13 +211,11 @@ public class Manazment {
                             p.getDouble("poplatok"), p.getDate("platny_od"), p.getDate("platny_do"));
 //                    resultList.add(cennik);
                 }
-
-            } catch (Exception e) {
-
+            }  catch (SQLException e) {
+                e.printStackTrace();
             }
-
         });
-        throw new ArrayIndexOutOfBoundsException();
+        return null;
     }
 
 
@@ -253,7 +244,7 @@ public class Manazment {
                     Vypozicka vypozicka = new Vypozicka(rs.getInt("id_vypozicky"), new Vozidlo(rs.getInt("id_vozidla")),
                             new Zakaznik(rs.getString("id_zakaznika")), rs.getDate("od"), rs.getDate("do"));
                     Vozidlo vozidlo = new Vozidlo(rs.getInt("id_vozidla"), new Cennik(rs.getInt("id_cennika")),
-                            rs.getString("spz"), rs.getString("znacka"), rs.getString("typ"), rs.getBlob("fotka"), rs.getDate("datum_vyradenia")); //TODO fotka
+                            rs.getString("spz"), rs.getString("znacka"), rs.getString("typ"), null, rs.getDate("datum_vyradenia")); //TODO fotka
                     Zakaznik zakaznik = zistiTypZakaznika(rs.getString("id_zakaznika"));
                     vypozicka.setVozidlo(vozidlo);
                     vypozicka.setZakaznik(zakaznik);
