@@ -3,7 +3,6 @@ package jadro;
 import db.PdsConnection;
 import db.SQL;
 import model.*;
-import sun.reflect.generics.reflectiveObjects.NotImplementedException;
 
 import javax.swing.*;
 import java.sql.PreparedStatement;
@@ -188,31 +187,31 @@ public class Manazment {
         return null;
     }
 
-    public Zakaznik nacitajOsobuAleboFirmu(Integer id) {
-        String osoba = "select id, kontakt, rod_cislo , meno , priezvisko from zakaznik join osoba on id  = rod_cislo where rod_cislo = " + id;
-        String firma = "select id, kontakt, ico       ,nazov , \"x\"      from zakaznik join osoba on id  = ico       where ico = " + id;
-
-        SQL.run(osoba + "\nUNION\n" + firma, (p) -> {
-            try {
-                if(p.getString(2).equals("x")){
-//                    return new Firma(p.getString("ico"),p.getString("nazov"));
-                }else{
-
-                }
-
-                while (p.next()) {
-                    Cennik cennik = new Cennik(p.getInt("ID"), p.getDouble("cena_den"),
-                            p.getDouble("poplatok"), p.getDate("platny_od"), p.getDate("platny_do"));
-//                    resultList.add(cennik);
-                }
-
-            } catch (Exception e) {
-
-            }
-
-        });
-        throw new NotImplementedException();
-    }
+//    public Zakaznik nacitajOsobuAleboFirmu(Integer id) {
+//        String osoba = "select id, kontakt, rod_cislo , meno , priezvisko from zakaznik join osoba on id  = rod_cislo where rod_cislo = " + id;
+//        String firma = "select id, kontakt, ico       ,nazov , \"x\"      from zakaznik join osoba on id  = ico       where ico = " + id;
+//
+//        SQL.run(osoba + "\nUNION\n" + firma, (p) -> {
+//            try {
+//                if(p.getString(2).equals("x")){
+////                    return new Firma(p.getString("ico"),p.getString("nazov"));
+//                }else{
+//
+//                }
+//
+//                while (p.next()) {
+//                    Cennik cennik = new Cennik(p.getInt("ID"), p.getDouble("cena_den"),
+//                            p.getDouble("poplatok"), p.getDate("platny_od"), p.getDate("platny_do"));
+////                    resultList.add(cennik);
+//                }
+//
+//            } catch (Exception e) {
+//
+//            }
+//
+//        });
+//        throw new NotImplementedException();
+//    }
 
 
     //pouzitie: ArrayList<Faktura> test = (ArrayList<Faktura>) man.nacitajFaktury("where suma > 400", "zaplatena", 10, 1);
@@ -240,7 +239,7 @@ public class Manazment {
                     Vypozicka vypozicka = new Vypozicka(rs.getInt("id_vypozicky"), new Vozidlo(rs.getInt("id_vozidla")),
                             new Zakaznik(rs.getString("id_zakaznika")), rs.getDate("od"), rs.getDate("do"));
                     Vozidlo vozidlo = new Vozidlo(rs.getInt("id_vozidla"), new Cennik(rs.getInt("id_cennika")),
-                            rs.getString("spz"), rs.getString("znacka"), rs.getString("typ"), null, rs.getDate("datum_vyradenia")); //TODO fotka
+                            rs.getString("spz"), rs.getString("znacka"), rs.getString("typ"), rs.getBlob("fotka"), rs.getDate("datum_vyradenia")); //TODO fotka
                     Zakaznik zakaznik = zistiTypZakaznika(rs.getString("id_zakaznika"));
                     vypozicka.setVozidlo(vozidlo);
                     vypozicka.setZakaznik(zakaznik);

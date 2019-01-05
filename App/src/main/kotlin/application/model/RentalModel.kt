@@ -10,7 +10,7 @@ class RentalModel : ItemViewModel<Vypozicka> {
 
     val id       = bind(Vypozicka::getId)
     val vozidlo  = bind(Vypozicka::getVozidlo )
-    val zakaznik = bind(Vypozicka::getZakaznik )
+    val zakaznik = bind { item?.zakaznik?.toProperty() ?: Zakaznik("0","0").toProperty()        }
     val datumOD  = bind(Vypozicka::getDatumOD )
     val datumDO  = bind(Vypozicka::getDatumDO )
 

@@ -1,10 +1,13 @@
 package model;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
 public class Zakaznik {
     private String id;
+    @Nullable
     private String kontakt;
 
     public Zakaznik(String id) {

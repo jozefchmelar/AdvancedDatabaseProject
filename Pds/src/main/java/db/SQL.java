@@ -110,7 +110,7 @@ final public class SQL {
                     resultList = new ArrayList<Vozidlo>();
                     while (p.next()) {
                         Vozidlo vozidlo = new Vozidlo(p.getInt("id"), new Cennik(p.getInt("id_cennika")),
-                                p.getString("spz"), p.getString("znacka"), p.getString("typ"), null, p.getDate("datum_vyradenia"));
+                                p.getString("spz"), p.getString("znacka"), p.getString("typ"), p.getBlob("fotka"), p.getDate("datum_vyradenia"));
                         Array array = p.getArray("udrzba");
                         if (array != null) {
                             Object[] zoznamUdrzieb = (Object[]) array.getArray();

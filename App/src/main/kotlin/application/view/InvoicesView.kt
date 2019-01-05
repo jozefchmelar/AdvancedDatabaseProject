@@ -28,7 +28,7 @@ class InvoicesView : View("Invoices") {
                 column("Price", InvoiceModel::suma).apply { isSortable = false }
                 column("Contact", InvoiceModel::vypozicka) {
                     isSortable = false
-                    converter(Conv { it.zakaznik.kontakt })
+                    converter(Conv { it.zakaznik?.kontakt.toString() })
                 }
                 column("Car SPZ", InvoiceModel::car) {
                     converter(Conv { it.spz })
