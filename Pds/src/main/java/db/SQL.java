@@ -115,7 +115,7 @@ final public class SQL {
                                 p.getString("spz"), p.getString("znacka"), p.getString("typ"), null, p.getDate("datum_vyradenia"));
                         vozidlo.setNaklady(p.getFloat("naklady"));
                         vozidlo.setVynosy(p.getFloat("vynosy"));
-                      //  vozidlo.getCennik().setCena_den(p.getDouble("cena_den"));
+                        vozidlo.getCennik().setCena_den(p.getDouble("cena_den"));
                         InputStream is = p.getBinaryStream("fotka");
                         if (is != null) {
                             String nazovFotky = vozidlo.getSpz();

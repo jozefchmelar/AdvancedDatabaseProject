@@ -62,9 +62,10 @@ class RentalNewRentalView : View("Rental") {
                             column("spz", VehicleModel::spz)
                             column("znacka", VehicleModel::znacka)
                             column("typ", VehicleModel::typ)
-                            column("Cena den",VehicleModel::cennik){
+                             column("Cena den", VehicleModel::cennik){
                                 converter(Conv{it.cena_den.toString()})
                             }
+
                             bindSelected(selectedVehicle)
                             smartResize()
                             selectionModel.selectedItemProperty().onChange {

@@ -141,14 +141,14 @@ public class Manazment {
     //Pouzitie: ArrayList<Vozidlo> test = (ArrayList<Vozidlo>) man.nacitajVozidla("where znacka = 'Opel'", "datum_vyradenia", 10, 1);
     public List<Vozidlo> nacitajVozidla(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
         String vyraz = "select * from" +
-                "( select v.*, naklady_vozidla(v.id) as naklady ,vynosy_vozidla(v.id) as vynosy ,rownum as rn " +
-                "from ( select * from vozidlo  " + vyrazWhere;
+                "( select v.*, naklady_vozidla(v.id) as naklady ,vynosy_vozidla(v.id) as vynosy ,y.cena_den,rownum as rn " +
+                "from ( select * from vozidlo   " + vyrazWhere;
         if (vyrazOrder.equals("")) {
             vyraz += " order by datum_vyradenia";
         } else {
             vyraz += " order by " + vyrazOrder;
         }
-        vyraz += " ) v ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
+        vyraz += " ) v JOIN cennik y on v.id_cennika = y.id ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
         return SQL.runQueryToList(vyraz);
     }
 
