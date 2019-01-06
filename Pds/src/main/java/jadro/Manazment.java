@@ -123,7 +123,7 @@ public class Manazment {
 
     public PoctyVozidiel poctyVozidiel(){
         String vsetky   = "count (*),";
-        String funkcne  = "count(case when datum_vyradenia is not null then 1 else 0 end)";
+        String funkcne  = "sum(case when datum_vyradenia is not null then 0 else 1 end)";
         String query =   "select "
                 +vsetky
                 +funkcne+
