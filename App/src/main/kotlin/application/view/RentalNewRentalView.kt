@@ -13,7 +13,6 @@ class RentalNewRentalView : View("Rental") {
     private val costumer: CustomersController by inject()
     private val vehicles: VehiclesController by inject()
     private val selectedVehicle = VehicleModel().toProperty()
-    val isRentingCompany = SimpleBooleanProperty(true)
 
     val rental = RentalModel()
 
@@ -27,14 +26,20 @@ class RentalNewRentalView : View("Rental") {
 
                         label("Who").addClass("card-title")
                         addClass("card")
-                        checkbox("Renting to company") { selectedProperty().bindBidirectional(isRentingCompany) }
+                        checkbox("Renting to company") {
+                            addClass("check-box")
+                            selectedProperty().bindBidirectional(rental.isRentingCompany)
+                        }
                         tableviewpag(costumer.companies) {
                             smartResize()
                             column("Nazov", CompanyModel::nazov).apply { isSortable = false }
                             column("Ico", CompanyModel::ico).apply { isSortable = false }
                             column("Kontakt", CompanyModel::kontakt).apply { isSortable = false }
-                            disableProperty().bind(isRentingCompany)
+                            disableProperty().bind(rental.isRentingCompany.select { (!it).toProperty() })
+                            bindSelected(rental.company)
                         }
+                        spacer()
+                        separator { paddingAll = 24 }
                         spacer()
                         tableviewpag(costumer.people) {
                             smartResize()
@@ -42,8 +47,8 @@ class RentalNewRentalView : View("Rental") {
                             column("Last name", PersonModel::priezvisko).apply { isSortable = false }
                             column("Birth nubmer", PersonModel::rodCislo).apply { isSortable = false }
                             column("Contatc", PersonModel::kontakt).apply { isSortable = false }
-                            disableProperty().bind(isRentingCompany.select { (!it).toProperty() })
-
+                            disableProperty().bind(rental.isRentingCompany)
+                            bindSelected(rental.person)
                         }
                     }
 
@@ -59,7 +64,12 @@ class RentalNewRentalView : View("Rental") {
                             column("typ", VehicleModel::typ)
                             bindSelected(selectedVehicle)
                             smartResize()
+                            selectionModel.selectedItemProperty().onChange {
+                                rental.vozidlo.value = it?.item
+                            }
                         }
+                        spacer()
+                        separator { paddingAll = 24 }
                         spacer()
                         borderpane {
                             center {
@@ -81,10 +91,10 @@ class RentalNewRentalView : View("Rental") {
                         form {
                             fieldset {
                                 field("From") {
-                                    datepicker()
+                                    datepicker(rental.datumOD)
                                 }
                                 field("To") {
-                                    datepicker()
+                                    datepicker(rental.datumDO)
                                 }
                             }
                         }
@@ -97,10 +107,14 @@ class RentalNewRentalView : View("Rental") {
                         addClass("card")
                         borderpane {
                             center {
-
                                 paddingAll = 24.0
                                 vbox {
-                                    button("Rent")
+                                    button("Rent"){
+                                        action{
+                                            rental.commit()
+                                            controller.rent(rental.item)
+                                        }
+                                    }
                                 }
                             }
                         }
