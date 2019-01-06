@@ -3,19 +3,19 @@ package application.view
 import application.controller.*
 import application.model.*
 import javafx.geometry.*
-import javafx.scene.layout.*
 import tableviewpag
 import tornadofx.*
 
 class VehiclesView : View("Vehicles") {
     private val controller: VehiclesController by inject()
     private val selectedVehicle = VehicleModel().toProperty()
+    private val newMaintance = MaintanceModel()
 
     override val root = borderpane {
         //   controller.get()
         padding = Insets(20.0)
 
-        center = vbox {
+        left = vbox {
             addClass("card")
             text("Vehicles").addClass("card-title")
             padding = Insets(20.0)
@@ -31,22 +31,55 @@ class VehiclesView : View("Vehicles") {
             }
 
         }
-        right = vbox {
-            addClass("card")
-            text("Maintance").addClass("card-title")
+        center = hbox {
+            vbox {
+                addClass("card")
+                text("Maintance").addClass("card-title")
 
-            tableview(selectedVehicle.select { it.udrzby }) {
-                column("pocetKM", MaintanceModel::pocetKM)
-                column("cena", MaintanceModel::cena)
-                column("datumOD", MaintanceModel::datumOD)
-                column("datumDO", MaintanceModel::datumDO)
-                column("popis", MaintanceModel::popis)
-                smartResize()
+                tableview(selectedVehicle.select { it.udrzby }) {
+                    column("pocetKM", MaintanceModel::pocetKM)
+                    column("cena", MaintanceModel::cena)
+                    column("datumOD", MaintanceModel::datumOD)
+                    column("datumDO", MaintanceModel::datumDO)
+                    column("popis", MaintanceModel::popis)
+                    smartResize()
+                }
+                separator()
+                imageview(selectedVehicle.select { it.fotkaCesta }) {
+
+                }
+            }
+            separator()
+            vbox {
+                addClass("card")
+                text("New Maintance record").addClass("card-title")
+              form{
+                  fieldset {
+                      field(" price") {
+                          textfield(newMaintance.cena)
+                      }
+                      field("km") {
+                          textfield(newMaintance.pocetKM)
+                      }
+                      field("From") {
+                          datepicker(newMaintance.datumOD)
+                      }
+                      field("To") {
+                          datepicker(newMaintance.datumDO)
+                      }
+                      field("popis") {
+                          textfield(newMaintance.popis)
+                      }
+                  }
+                  button("add"){
+                      action{
+                          newMaintance.commit()
+                          controller.addMaintnace(selectedVehicle.value.item,newMaintance.item)
+                      }
+                  }
+              }
             }
 
-            imageview(selectedVehicle.select { it.fotkaCesta }){
-
-            }
         }
 
     }

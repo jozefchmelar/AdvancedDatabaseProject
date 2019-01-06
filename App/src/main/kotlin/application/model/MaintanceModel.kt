@@ -10,8 +10,8 @@ class MaintanceModel : ItemViewModel<Udrzba> {
 
     val pocetKM = bind { item?.pocetKM?.toString()?.toProperty() ?: "0.0".toProperty()}
     val cena = bind { item?.cena?.toString()?.toProperty() ?: "0.0".toProperty()}
-    val datumOD = bind(Udrzba::getDatumOD)
-    val datumDO = bind(Udrzba::getDatumDO)
+    val datumOD = bind { item?.datumOD?.toLocalDate().toProperty()}
+    val datumDO = bind { item?.datumDO?.toLocalDate().toProperty()}
     val popis   = bind(Udrzba::getPopis)
 
     override fun onCommit() {
@@ -19,8 +19,8 @@ class MaintanceModel : ItemViewModel<Udrzba> {
         item = Udrzba(
                 pocetKM.value.toLong(),
                 cena.value.toDouble(),
-                datumOD.value,
-                datumDO.value,
+                datumOD.value.toDate(),
+                datumDO.value.toDate(),
                 popis.value
         )
     }
