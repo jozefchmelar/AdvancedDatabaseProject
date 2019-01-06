@@ -2,17 +2,11 @@ package db;
 
 import jadro.PodporovaneTypy;
 import model.*;
-import oracle.jdbc.OraclePreparedStatement;
-import oracle.jdbc.OracleResultSet;
-
-import org.w3c.dom.Document;
 
 import java.io.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 import java.util.function.Consumer;
 
 final public class SQL {
@@ -214,9 +208,10 @@ final public class SQL {
                 if (vozidlo.getFotkaCesta().equals("")) {
                     ps.setBinaryStream(6, null);
                 } else {
-                    File imgfile = new File(vozidlo.getFotkaCesta());
-                    FileInputStream fin = new FileInputStream(imgfile);
-                    ps.setBinaryStream(6, fin, (int) imgfile.length());
+                    System.out.println(vozidlo.getFotkaCesta());
+                  File imgfile = new File(vozidlo.getFotkaCesta());
+                  FileInputStream fin = new FileInputStream(imgfile);
+                  ps.setBinaryStream(6, fin, (int) imgfile.length());
                 }
                 int counter = 7;
                 if (vozidlo.getUdrzby().isEmpty()) {
@@ -236,7 +231,11 @@ final public class SQL {
                         counter++;
                     }
                 }
-                ps.setDate(counter, new java.sql.Date(vozidlo.getDatum_vyradenia().getTime()));
+                if(vozidlo.getDatum_vyradenia()!=null)
+                    ps.setDate(counter, new java.sql.Date(vozidlo.getDatum_vyradenia().getTime()));
+                else
+                    ps.setDate(counter, null);
+
             } else if (data instanceof Vypozicka) {
                 String query = "Insert into Vypozicka ( id, id_vozidla, id_zakaznika, od, do ) Values (?,?,?,?,?)";
                 ps = ((Vypozicka) data).insertStatement(PdsConnection.getInstance().getConnection().prepareStatement(query));

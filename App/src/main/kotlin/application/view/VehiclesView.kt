@@ -13,25 +13,34 @@ class VehiclesView : View("Vehicles") {
 
     override val root = borderpane {
         //   controller.get()
-        padding = Insets(20.0)
+        paddingAll = 24.0
 
-        left = vbox {
-            addClass("card")
-            text("Vehicles").addClass("card-title")
-            padding = Insets(20.0)
 
-            tableviewpag(controller.vehicles) {
+        left = hbox {
+            paddingAll = 24.0
+            vbox {
 
-                column("id", VehicleModel::id)
-                column("spz", VehicleModel::spz)
-                column("znacka", VehicleModel::znacka)
-                column("typ", VehicleModel::typ)
-                bindSelected(selectedVehicle)
-                smartResize()
+                addClass("card")
+                text("Vehicles").addClass("card-title")
+
+                tableviewpag(controller.vehicles) {
+
+                    column("id", VehicleModel::id)
+                    column("spz", VehicleModel::spz)
+                    column("znacka", VehicleModel::znacka)
+                    column("typ", VehicleModel::typ)
+                    bindSelected(selectedVehicle)
+                    smartResize()
+                }
+                spacer()
+
             }
-
         }
         center = hbox {
+            paddingAll = 24.0
+
+            separator()
+
             vbox {
                 addClass("card")
                 text("Maintance").addClass("card-title")
@@ -44,40 +53,49 @@ class VehiclesView : View("Vehicles") {
                     column("popis", MaintanceModel::popis)
                     smartResize()
                 }
-                separator()
-                imageview(selectedVehicle.select { it.fotkaCesta }) {
-
+                spacer()
+                borderpane {
+                    center {
+                        imageview(selectedVehicle.select { it.fotkaCesta }) {
+                            isPreserveRatio = true
+                            fitHeight = 300.0
+                            fitWidth = 300.0
+                        }
+                    }
                 }
+
             }
-            separator()
+            spacer()
             vbox {
+                paddingAll = 24.0
+
                 addClass("card")
                 text("New Maintance record").addClass("card-title")
-              form{
-                  fieldset {
-                      field(" price") {
-                          textfield(newMaintance.cena)
-                      }
-                      field("km") {
-                          textfield(newMaintance.pocetKM)
-                      }
-                      field("From") {
-                          datepicker(newMaintance.datumOD)
-                      }
-                      field("To") {
-                          datepicker(newMaintance.datumDO)
-                      }
-                      field("popis") {
-                          textfield(newMaintance.popis)
-                      }
-                  }
-                  button("add"){
-                      action{
-                          newMaintance.commit()
-                          controller.addMaintnace(selectedVehicle.value.item,newMaintance.item)
-                      }
-                  }
-              }
+                form {
+                    fieldset {
+                        field(" price") {
+                            textfield(newMaintance.cena)
+                        }
+                        field("km") {
+                            textfield(newMaintance.pocetKM)
+                        }
+                        field("From") {
+                            datepicker(newMaintance.datumOD)
+                        }
+                        field("To") {
+                            datepicker(newMaintance.datumDO)
+                        }
+                        field("popis") {
+                            textfield(newMaintance.popis)
+                        }
+                    }
+                    button("add") {
+                        action {
+                            newMaintance.commit()
+                            controller.addMaintnace(selectedVehicle.value.item, newMaintance.item)
+                        }
+                    }
+                }
             }
 
         }

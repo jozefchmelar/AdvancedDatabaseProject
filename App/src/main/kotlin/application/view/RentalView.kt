@@ -16,6 +16,7 @@ class RentalView : View("Rental") {
         padding = Insets(20.0)
 
         center = tabpane {
+            tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
             tab("Rentals") {
                 tableviewpag(controller.rentals) {
                     column("id", RentalModel::id).apply { isSortable = false }
@@ -38,9 +39,7 @@ class RentalView : View("Rental") {
                     smartResize()
                 }
             }
-            tab("New rent") {
-
-            }
+           tab(RentalNewRentalView::class)
         }
     }
 }

@@ -1,0 +1,110 @@
+package application.view
+
+import application.controller.*
+import application.model.*
+import javafx.beans.property.*
+import javafx.geometry.*
+import tableviewpag
+import tornadofx.*
+
+class RentalNewRentalView : View("Rental") {
+
+    private val controller: RentalController by inject()
+    private val costumer: CustomersController by inject()
+    private val vehicles: VehiclesController by inject()
+    private val selectedVehicle = VehicleModel().toProperty()
+    val isRentingCompany = SimpleBooleanProperty(true)
+
+    val rental = RentalModel()
+
+    override val root = borderpane {
+        center =
+                hbox {
+                    paddingAll = 24.0
+
+                    vbox {
+                        paddingAll = 24.0
+
+                        label("Who").addClass("card-title")
+                        addClass("card")
+                        checkbox("Renting to company") { selectedProperty().bindBidirectional(isRentingCompany) }
+                        tableviewpag(costumer.companies) {
+                            smartResize()
+                            column("Nazov", CompanyModel::nazov).apply { isSortable = false }
+                            column("Ico", CompanyModel::ico).apply { isSortable = false }
+                            column("Kontakt", CompanyModel::kontakt).apply { isSortable = false }
+                            disableProperty().bind(isRentingCompany)
+                        }
+                        spacer()
+                        tableviewpag(costumer.people) {
+                            smartResize()
+                            column("First name", PersonModel::meno).apply { isSortable = false }
+                            column("Last name", PersonModel::priezvisko).apply { isSortable = false }
+                            column("Birth nubmer", PersonModel::rodCislo).apply { isSortable = false }
+                            column("Contatc", PersonModel::kontakt).apply { isSortable = false }
+                            disableProperty().bind(isRentingCompany.select { (!it).toProperty() })
+
+                        }
+                    }
+
+                    spacer()
+                    vbox {
+                        paddingAll = 24.0
+
+                        label("Car").addClass("card-title")
+                        addClass("card")
+                        tableviewpag(vehicles.vehicles) {
+                            column("spz", VehicleModel::spz)
+                            column("znacka", VehicleModel::znacka)
+                            column("typ", VehicleModel::typ)
+                            bindSelected(selectedVehicle)
+                            smartResize()
+                        }
+                        spacer()
+                        borderpane {
+                            center {
+                                imageview(selectedVehicle.select { it.fotkaCesta }) {
+                                    isPreserveRatio = true
+                                    fitHeight = 300.0
+                                    fitWidth = 300.0
+                                }
+                            }
+                        }
+
+                    }
+                    spacer()
+                    vbox {
+                        paddingAll = 24.0
+
+                        label("Date").addClass("card-title")
+                        addClass("card")
+                        form {
+                            fieldset {
+                                field("From") {
+                                    datepicker()
+                                }
+                                field("To") {
+                                    datepicker()
+                                }
+                            }
+                        }
+                    }
+                    spacer()
+                    spacer()
+                    vbox {
+                        paddingAll = 24.0
+                        label("Rent").addClass("card-title")
+                        addClass("card")
+                        borderpane {
+                            center {
+
+                                paddingAll = 24.0
+                                vbox {
+                                    button("Rent")
+                                }
+                            }
+                        }
+                    }
+                }
+    }
+}

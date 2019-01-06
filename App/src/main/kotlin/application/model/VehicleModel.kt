@@ -25,8 +25,9 @@ class VehicleModel : ItemViewModel<Vozidlo> {
         if (item != null) {
             val bytes = item.fotkaCesta
             if (bytes != null) {
-                val x = bytes.binaryStream
-                toReturn = Image(x).toProperty()
+                val prefix = if(item.fotkaCesta.length < 15 && item.fotkaCesta!="no_image") "Fotky/" else ""
+                val x = Image(FileInputStream(File(prefix+item.fotkaCesta)))
+                toReturn = x.toProperty()
             }
         }
 
@@ -46,7 +47,9 @@ class VehicleModel : ItemViewModel<Vozidlo> {
                 spz.value,
                 znacka.value,
                 typ.value,
+                photoPath.value,
                 datum_vyradenia.value
         )
+       // photoPath.value = "NoPhoto"
     }
 }

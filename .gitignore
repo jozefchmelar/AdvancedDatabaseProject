@@ -8,7 +8,7 @@ connection.txt
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion
 
 *.iml
-
+*.jpg
 ## Directory-based project format:
 .idea/
 
