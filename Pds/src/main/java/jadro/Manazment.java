@@ -1,9 +1,14 @@
 package jadro;
 
+import db.PdsConnection;
 import db.SQL;
 import model.*;
 
 import javax.swing.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -218,7 +223,6 @@ public class Manazment {
         return null;
     }
 
-
     //pouzitie: ArrayList<Faktura> test = (ArrayList<Faktura>) man.nacitajFaktury("where suma > 400", "zaplatena", 10, 1);
     public List<Faktura> nacitajFaktury(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
         String vyraz = "select * from" +
@@ -337,15 +341,85 @@ public class Manazment {
         return SQL.runUpdateQuery(vyraz);
     }
 
+    //treba znovu rozmyslat nad tym, co jasne definuje udrzbu? Tuto metodu pouzi ked chces deletnut viacere udrzby podla nejakeho atributu. Ak chces deletnu konkretnu udrzbu, tak pouzi druhu metodu.
+    //pouzitie:  int vysl = man.vymazUdrzby("spz2", "popis = 'popis2'");
+    public int vymazUdrzby(String spzVozidla, String vyrazWhere) {
+        String vyraz = "delete from table ( select v.udrzba from vozidlo v where spz = '" + spzVozidla + "') u where " + vyrazWhere;
+        return SQL.runUpdateQuery(vyraz);
+    }
+
+    //Sluzi pre delete konkretnej udrzby vozidla
+    //pouzitie: int vysl = man.vymazUdrzby("spz2", new Udrzba(1, 2, new GregorianCalendar(1986, Calendar.SEPTEMBER, 29).getTime(), new GregorianCalendar(1986, Calendar.SEPTEMBER, 29).getTime(), "popis1"));
+    public int vymazUdrzby(String spzVozidla, Udrzba udrzba) {
+        String vyraz = "delete from table ( select v.udrzba from vozidlo v where spz = '" + spzVozidla + "') u where u.km = "
+                + udrzba.getPocetKM() + " and u.cena = " + udrzba.getCena() + " and u.od = to_date('" + new java.sql.Date(udrzba.getDatumOD().getTime()).toString()
+                + "', 'yyyy-mm-dd') and u.do = to_date('" + new java.sql.Date(udrzba.getDatumDO().getTime()).toString() + "', 'yyyy-mm-dd') and u.popis = '" + udrzba.getPopis() + "'";
+        return SQL.runUpdateQuery(vyraz);
+    }
+
+    public int vymazCenniky(String vyrazWhere) {
+        String vyraz = "delete from cennik where " + vyrazWhere;
+        return SQL.runUpdateQuery(vyraz);
+    }
+
+    public int vymazVypozicky(String vyrazWhere) {
+        String vyraz = "delete from vypozicka where " + vyrazWhere;
+        return SQL.runUpdateQuery(vyraz);
+    }
+
+    public int vymazFaktury(String vyrazWhere) {
+        String vyraz = "delete from faktura where " + vyrazWhere;
+        return SQL.runUpdateQuery(vyraz);
+    }
+
+    public int vymazOsobu(String rodCislo) {
+        String vyraz = "delete from osoba where rod_cislo = '" + rodCislo + "'";
+        int vysl = SQL.runUpdateQuery(vyraz);
+        if (vysl > 0) {
+            vyraz = "delete from zakaznik where id = '" + rodCislo + "'";
+            return SQL.runUpdateQuery(vyraz);
+        }
+        return vysl;
+    }
+
+    public int vymazFirmu(String ico) {
+        String vyraz = "delete from firma where rod_cislo = '" + ico + "'";
+        int vysl = SQL.runUpdateQuery(vyraz);
+        if (vysl > 0) {
+            vyraz = "delete from zakaznik where id = '" + ico + "'";
+            return SQL.runUpdateQuery(vyraz);
+        }
+        return vysl;
+    }
 
     /*
      * Update
      * vrati pocet riadkov, v pripade erroru vrati -1
      */
     //pouzitie: int vysl = man.updateVozidla("spz='test'", "spz='test2'");
-    public int updateVozidla(String vyrazWhere, String vyrazSet) {
-        String vyraz = "Update vozidlo set " + vyrazSet + " Where " + vyrazWhere;
-        return SQL.runUpdateQuery(vyraz);
+    public int updateVozidla(Vozidlo stareVozidlo, Vozidlo noveVozidlo) {
+        String vyraz = "Update vozidlo set id_cennika = ?, spz = ?, znacka = ?, typ = ?, fotka = ?, datum_vyradenia = ? where spz = '" + stareVozidlo.getSpz() + "'";
+        try {
+            PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(vyraz);
+            ps.setInt(1, noveVozidlo.getCennik().getId());
+            ps.setString(2, noveVozidlo.getSpz());
+            ps.setString(3, noveVozidlo.getZnacka());
+            ps.setString(4, noveVozidlo.getTyp());
+            if (noveVozidlo.getFotkaCesta().equals("")) {
+                ps.setBinaryStream(5, null);
+            } else {
+                File imgfile = new File(noveVozidlo.getFotkaCesta());
+                FileInputStream fin = new FileInputStream(imgfile);
+                ps.setBinaryStream(5, fin, (int) imgfile.length());
+            }
+            ps.setDate(6, new java.sql.Date(noveVozidlo.getDatum_vyradenia().getTime()));
+            return ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return -1;
     }
 
     public int updateCenniky(String vyrazWhere, String vyrazSet) {

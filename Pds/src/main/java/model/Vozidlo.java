@@ -12,7 +12,7 @@ public class Vozidlo {
     private String spz;
     private String znacka;
     private String typ;
-    private Blob fotkaCesta;
+    private String fotkaCesta;
     private ArrayList<Udrzba> udrzby;
     private Date datum_vyradenia;
 
@@ -20,7 +20,7 @@ public class Vozidlo {
         this.id = id;
     }
 
-    public Vozidlo(int id, Cennik cennik, String spz, String znacka, String typ, Blob fotkaCesta, Date datum_vyradenia) {
+    public Vozidlo(int id, Cennik cennik, String spz, String znacka, String typ, String fotkaCesta, Date datum_vyradenia) {
         this.id = id;
         this.cennik = cennik;
         this.spz = spz;
@@ -37,7 +37,7 @@ public class Vozidlo {
         this.spz = spz;
         this.znacka = znacka;
         this.typ = typ;
-        this.fotkaCesta = null;
+        this.fotkaCesta = "";
         this.udrzby = new ArrayList<>();
         this.datum_vyradenia = datum_vyradenia;
     }
@@ -82,11 +82,11 @@ public class Vozidlo {
         this.typ = typ;
     }
 
-    public Blob getFotkaCesta() {
+    public String getFotkaCesta() {
         return fotkaCesta;
     }
 
-    public void setFotkaCesta(Blob fotkaCesta) {
+    public void setFotkaCesta(String fotkaCesta) {
         this.fotkaCesta = fotkaCesta;
     }
 

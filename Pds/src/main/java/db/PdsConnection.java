@@ -10,7 +10,7 @@ import java.util.List;
 
 final public class PdsConnection {
 
-    final Connection getConnection() {
+    public final Connection getConnection() {
         return connection;
     }
 
@@ -33,7 +33,7 @@ final public class PdsConnection {
         }
     }
 
-    static PdsConnection getInstance() {
+    public static PdsConnection getInstance() {
         if (instance == null) {
             instance = new PdsConnection();
         }
