@@ -1,5 +1,6 @@
 package application.model
 
+import application.controller.*
 import javafx.beans.property.*
 import javafx.collections.*
 import javafx.scene.image.*
@@ -41,6 +42,7 @@ class VehicleModel : ItemViewModel<Vozidlo> {
                 ?: FXCollections.observableArrayList<MaintanceModel>().toProperty()
     }
     val datum_vyradenia = bind(Vozidlo::getDatum_vyradenia)
+
 
     override fun onCommit() {
         super.onCommit()

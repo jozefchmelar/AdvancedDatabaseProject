@@ -16,6 +16,7 @@ class AllVehicels : View("Vehicles") {
         tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
         tab(VehiclesView::class)
         tab(NewVehicleView::class)
+        tab(VehicleState::class)
     }
 }
 

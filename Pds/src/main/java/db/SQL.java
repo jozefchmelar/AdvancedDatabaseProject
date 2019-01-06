@@ -11,12 +11,25 @@ import java.util.function.Consumer;
 
 final public class SQL {
 
+    public static void call(String procedure){
+        try {
+            CallableStatement st = PdsConnection.getInstance().getConnection().prepareCall("{call "+ procedure+" }");
+            st.execute();
+            System.out.println(st.getString(1));
+            st.close();
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
+
     public static void run(String query, Consumer<ResultSet> onResult) {
         try {
             PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(query);
             ResultSet p = ps.executeQuery();
-            p.next();
-            System.out.println(p.getSQLXML("report_one").getString());
+          //  p.next();
+         //   System.out.println(p.getSQLXML("report_one").getString());
             if (onResult != null) {
                 while (p.next()) {
                     onResult.accept(p);

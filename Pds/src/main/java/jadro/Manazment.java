@@ -121,6 +121,25 @@ public class Manazment {
         return SQL.runInsertQuery(firma);
     }
 
+    public PoctyVozidiel poctyVozidiel(){
+        String vsetky   = "count (*),";
+        String funkcne  = "count(case when datum_vyradenia is not null then 1 else 0 end)";
+        String query =   "select "
+                +vsetky
+                +funkcne+
+                " from vozidlo";
+        final PoctyVozidiel[] poctyVozidiel = {null};
+        SQL.run(query,(row)->{
+            try {
+                 poctyVozidiel[0] = new PoctyVozidiel(row.getInt(1), row.getInt(2));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        return poctyVozidiel[0];
+
+    }
+
     public int pridajUdrzbu(Vozidlo vozidlo, Udrzba udrzba) {
         String vyraz = "";
         if (vozidlo.getUdrzby().isEmpty()) {
