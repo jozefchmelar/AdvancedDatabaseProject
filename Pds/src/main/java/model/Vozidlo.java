@@ -16,6 +16,11 @@ public class Vozidlo {
     private ArrayList<Udrzba> udrzby;
     private Date datum_vyradenia;
 
+
+
+    private Float vynosy;
+    private Float naklady;
+
     public Vozidlo(int id) {
         this.id = id;
     }
@@ -84,6 +89,23 @@ public class Vozidlo {
 
     public String getFotkaCesta() {
         return fotkaCesta;
+    }
+
+
+    public Float getVynosy() {
+        return vynosy;
+    }
+
+    public void setVynosy(Float vynosy) {
+        this.vynosy = vynosy;
+    }
+
+    public Float getNaklady() {
+        return naklady;
+    }
+
+    public void setNaklady(Float naklady) {
+        this.naklady = naklady;
     }
 
     public void setFotkaCesta(String fotkaCesta) {

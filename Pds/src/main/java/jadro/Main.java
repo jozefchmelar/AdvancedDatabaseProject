@@ -4,6 +4,7 @@ import db.SQL;
 import model.Cennik;
 import model.Udrzba;
 import model.Vozidlo;
+import oracle.xdb.XMLType;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,8 +16,7 @@ public class Main {
     public static void main(String[] args) {
 
 
-//        SQL.test("select x.report_one from xml_reports x");
-
+        SQL.run("select x.report_one from xml_reports x");
         //QL.test("select x.report_one from xml_reports x");
 
 //        SQL.run("drop table test");

@@ -141,8 +141,8 @@ public class Manazment {
     //Pouzitie: ArrayList<Vozidlo> test = (ArrayList<Vozidlo>) man.nacitajVozidla("where znacka = 'Opel'", "datum_vyradenia", 10, 1);
     public List<Vozidlo> nacitajVozidla(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
         String vyraz = "select * from" +
-                "( select v.*, rownum as rn " +
-                "from ( select * from vozidlo " + vyrazWhere;
+                "( select v.*, naklady_vozidla(v.id) as naklady ,vynosy_vozidla(v.id) as vynosy ,rownum as rn " +
+                "from ( select * from vozidlo  " + vyrazWhere;
         if (vyrazOrder.equals("")) {
             vyraz += " order by datum_vyradenia";
         } else {

@@ -19,14 +19,17 @@ class VehicleModel : ItemViewModel<Vozidlo> {
     val spz = bind(Vozidlo::getSpz)
     val znacka = bind(Vozidlo::getZnacka)
     val typ = bind(Vozidlo::getTyp)
+    val naklady = bind(Vozidlo::getNaklady)
+    val vynosy = bind(Vozidlo::getVynosy)
+
     val fotkaCesta = bind {
         var toReturn: SimpleObjectProperty<Image> = Image(FileInputStream(File("no_image.jpg"))).toProperty()
 
         if (item != null) {
             val bytes = item.fotkaCesta
             if (bytes != null) {
-                val prefix = if(item.fotkaCesta.length < 15 && item.fotkaCesta!="no_image") "Fotky/" else ""
-                val x = Image(FileInputStream(File(prefix+item.fotkaCesta)))
+                val prefix = if (item.fotkaCesta.length < 15 && item.fotkaCesta != "no_image") "Fotky/" else ""
+                val x = Image(FileInputStream(File(prefix + item.fotkaCesta)))
                 toReturn = x.toProperty()
             }
         }
@@ -50,6 +53,6 @@ class VehicleModel : ItemViewModel<Vozidlo> {
                 photoPath.value,
                 datum_vyradenia.value
         )
-       // photoPath.value = "NoPhoto"
+        // photoPath.value = "NoPhoto"
     }
 }

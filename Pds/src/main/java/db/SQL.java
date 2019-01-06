@@ -113,7 +113,9 @@ final public class SQL {
                     while (p.next()) {
                         Vozidlo vozidlo = new Vozidlo(p.getInt("id"), new Cennik(p.getInt("id_cennika")),
                                 p.getString("spz"), p.getString("znacka"), p.getString("typ"), null, p.getDate("datum_vyradenia"));
-
+                        vozidlo.setNaklady(p.getFloat("naklady"));
+                        vozidlo.setVynosy(p.getFloat("vynosy"));
+                      //  vozidlo.getCennik().setCena_den(p.getDouble("cena_den"));
                         InputStream is = p.getBinaryStream("fotka");
                         if (is != null) {
                             String nazovFotky = vozidlo.getSpz();

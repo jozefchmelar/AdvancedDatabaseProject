@@ -11,7 +11,7 @@ class PricingController : Controller() {
         Db.connection.pridajCennik(item)
     }
 
-    val pricing = TableModel { Db.connection.nacitajCenniky("","",10,it).map(::PricingModel) }
+    val pricing = TableModel { Db.connection.nacitajCenniky("","",25,it).map(::PricingModel) }
 
     init {
         pricing.current()

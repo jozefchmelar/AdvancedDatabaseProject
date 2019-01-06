@@ -8,6 +8,8 @@ import tornadofx.*
 
 class VehiclesView : View("Vehicles") {
     private val controller: VehiclesController by inject()
+    val priceController: PricingController by inject()
+
     private val selectedVehicle = VehicleModel().toProperty()
     private val newMaintance = MaintanceModel()
 
@@ -24,11 +26,16 @@ class VehiclesView : View("Vehicles") {
                 text("Vehicles").addClass("card-title")
 
                 tableviewpag(controller.vehicles) {
-
                     column("id", VehicleModel::id)
                     column("spz", VehicleModel::spz)
                     column("znacka", VehicleModel::znacka)
                     column("typ", VehicleModel::typ)
+                    column("Naklady", VehicleModel::naklady)
+                    column("Vynosy", VehicleModel::vynosy)
+                    column("Cena den", VehicleModel::cennik){
+                        converter(Conv{it.cena_den.toString()})
+                    }
+
                     bindSelected(selectedVehicle)
                     smartResize()
                 }
