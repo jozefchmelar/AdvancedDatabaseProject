@@ -5,12 +5,16 @@ import application.model.*
 import javafx.scene.layout.*
 import tableviewpag
 import tornadofx.*
+import java.time.*
 
 class CustomerCompanyView : View("Company") {
 
     private val controller: CustomersController by inject()
 
     private val createdCompany = CompanyModel()
+    val selected = CompanyModel().toProperty()
+    val from = LocalDate.now().toProperty()
+    val to = LocalDate.now().toProperty()
 
     override val root = borderpane {
         paddingAll = 24.0
@@ -28,6 +32,7 @@ class CustomerCompanyView : View("Company") {
                         column("Nazov", CompanyModel::nazov).apply { isSortable = false }
                         column("Ico", CompanyModel::ico).apply { isSortable = false }
                         column("Kontakt", CompanyModel::kontakt).apply { isSortable = false }
+                        bindSelected(selected)
                     }
 
                 }
@@ -59,6 +64,26 @@ class CustomerCompanyView : View("Company") {
                         action {
                             createdCompany.commit()
                             controller.saveCompany(createdCompany.item)
+                        }
+                    }
+                }
+                separator()
+                text("Pocet vypozicnych dni").addClass("card-title")
+                form {
+                    fieldset {
+                        field("Od") {
+                            datepicker(from)
+                        }
+                        field("Do") {
+                            datepicker(to)
+                        }
+                        field("Pocet dni") {
+                            textfield(controller.companyRentDays) {
+                                isEditable = false
+                            }
+                        }
+                        button("Get") {
+                            action { controller.getCompanyRentDays(from.value.toDate(), to.value.toDate(),selected.value) }
                         }
                     }
                 }

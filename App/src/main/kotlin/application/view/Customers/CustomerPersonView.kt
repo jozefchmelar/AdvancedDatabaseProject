@@ -5,11 +5,16 @@ import application.model.*
 import javafx.scene.layout.*
 import tableviewpag
 import tornadofx.*
+import java.time.*
 
 class CustomerPersonView : View("Person") {
 
     private val controller: CustomersController by inject()
     private val createdCustomer = PersonModel()
+
+    val selected = PersonModel().toProperty()
+    val from = LocalDate.now().toProperty()
+    val to = LocalDate.now().toProperty()
 
     override val root = borderpane {
         paddingAll = 24.0
@@ -28,6 +33,7 @@ class CustomerPersonView : View("Person") {
                         column("Last name", PersonModel::priezvisko).apply { isSortable = false }
                         column("Birth nubmer", PersonModel::rodCislo).apply { isSortable = false }
                         column("Contatc", PersonModel::kontakt).apply { isSortable = false }
+                        bindSelected(selected)
                     }
 
                 }
@@ -60,9 +66,32 @@ class CustomerPersonView : View("Person") {
                 hbox {
 
                     button("Get") {
-                        action {   createdCustomer.commit()
-                       controller.savePerson(createdCustomer.item) }
+                        action {
+                            createdCustomer.commit()
+                            controller.savePerson(createdCustomer.item)
+                        }
                     }
+                }
+                separator()
+                text("Pocet vypozicnych dni").addClass("card-title")
+                form {
+                    fieldset {
+                        field("Od") {
+                            datepicker(from)
+                        }
+                        field("Do") {
+                            datepicker(to)
+                        }
+                        field("Pocet dni") {
+                            textfield(controller.peopleRentDays) {
+                                isEditable = false
+                            }
+                        }
+                        button("Get") {
+                            action { controller.getPersonRentaDate(from.value.toDate(), to.value.toDate(), selected.value) }
+                        }
+                    }
+
                 }
             }
         }

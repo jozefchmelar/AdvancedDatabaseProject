@@ -5,10 +5,14 @@ import javafx.beans.property.*
 import javafx.scene.chart.*
 import model.*
 import tornadofx.*
+import java.text.*
+import java.util.*
 import kotlin.math.*
 
 class VehiclesController : Controller() {
 
+    val znacky = SimpleIntegerProperty(0)
+    val autoPocty = SimpleIntegerProperty(0)
     fun addMaintnace(value: Vozidlo, item: Udrzba?) {
         Db.connection.pridajUdrzbu(value, item)
         vehicles.current()
@@ -56,6 +60,16 @@ class VehiclesController : Controller() {
         vehicles.current()
         pricing.current()
         vehiclesFault.current()
+    }
+
+    fun getCounts(toDate: Date?, toDate1: Date?, value: VehicleModel?) {
+        val sdf = SimpleDateFormat("yyyyMMdd")
+        val from = sdf.format(toDate)
+        val to = sdf.format(toDate1)
+        Db.connection.poctyPreVozidla(from, to, value!!.id.value, value.znacka.value).let {
+            znacky.set(it.first)
+            autoPocty.set(it.second)
+        }
     }
 }
 

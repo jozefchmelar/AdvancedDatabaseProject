@@ -5,6 +5,8 @@ import application.model.*
 import application.view.Rental.*
 import tableviewpag
 import tornadofx.*
+import tornadofx.Stylesheet.Companion.selected
+import java.time.*
 import kotlin.math.*
 class VehiclesView : View("Vehicles") {
     private val controller: VehiclesController by inject()
@@ -12,6 +14,8 @@ class VehiclesView : View("Vehicles") {
 
     private val selectedVehicle = VehicleModel().toProperty()
     private val newMaintance = MaintanceModel()
+    val from = LocalDate.now().toProperty()
+    val to = LocalDate.now().toProperty()
 
     override val root = borderpane {
         //   controller.get()
@@ -105,6 +109,35 @@ class VehiclesView : View("Vehicles") {
                             controller.addMaintnace(selectedVehicle.value.item, newMaintance.item)
                         }
                     }
+                }
+                separator()
+                hbox {
+                    text("Pocet vypoziciek znacky ").addClass("card-title")
+                    text(selectedVehicle.select { it?.znacka ?:"".toProperty() }).addClass("card-title")
+                }
+                form {
+                    fieldset {
+                        field("Od") {
+                            datepicker(from)
+                        }
+                        field("Do") {
+                            datepicker(to)
+                        }
+                        field("Vypozicky znacky") {
+                            textfield(controller.znacky) {
+                                isEditable = false
+                            }
+                        }
+                        field("Pocet vypoziciek") {
+                            textfield(controller.autoPocty) {
+                                isEditable = false
+                            }
+                        }
+                        button("Get") {
+                           action { controller.getCounts(from.value.toDate(), to.value.toDate(), selectedVehicle.value) }
+                        }
+                    }
+
                 }
             }
 

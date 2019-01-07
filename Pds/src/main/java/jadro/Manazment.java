@@ -8,10 +8,11 @@ import model.*;
 import model.Xml.Spolahlivost.ReportXml;
 import model.Xml.Spolahlivost.XmlReport;
 import oracle.xdb.XMLType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.json.JSONObject;
 import org.json.XML;
 
-import javax.swing.*;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,6 +21,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 
@@ -336,7 +338,6 @@ public class Manazment {
     }
 
 
-
     //pouzitie: ArrayList<Osoba> test = (ArrayList<Osoba>) man.nacitajZakaznikovOsoby("where meno = 'Michaela'", "priezvisko", 10, 1);
     public List<Osoba> nacitajZakaznikovOsoby(String vyrazWhere, String vyrazOrder, int velkostStranky,
                                               int indexStranky) {
@@ -371,7 +372,6 @@ public class Manazment {
     /*
      * Vypis vsetkych dat z tabuliek
      */
-
 
 
     /*
@@ -557,11 +557,11 @@ public class Manazment {
     * */
     public List<Vozidlo> vozidlaBezZisku(String from, String to, int velkostStranky, int indexStranky) {
         String vyraz = "select id,spz,zarobok from " +
-                "    (   select id,spz, zarobok_vozidla_datum(id,'"+from+"','"+to+"') as zarobok, rownum as rn " +
+                "    (   select id,spz, zarobok_vozidla_datum(id,'" + from + "','" + to + "') as zarobok, rownum as rn " +
                 "        from ( vozidlo) v " +
-                "        where zarobok_vozidla_datum(id,'"+from+"','"+to+"') <= 0 " +
+                "        where zarobok_vozidla_datum(id,'" + from + "','" + to + "') <= 0 " +
                 "        order by zarobok " +
-                "    )  where rn between  + (("+indexStranky+") * "+velkostStranky+" - "+velkostStranky+")   and   "+velkostStranky+" * "+indexStranky;
+                "    )  where rn between  + ((" + indexStranky + ") * " + velkostStranky + " - " + velkostStranky + ")   and   " + velkostStranky + " * " + indexStranky;
 
 
         System.out.println(vyraz);
@@ -572,7 +572,7 @@ public class Manazment {
                 while (row.next()) {
                     Vozidlo voz = new Vozidlo((row.getInt(1)));
                     voz.setSpz(row.getString("spz"));
-                    voz.setVynosy( row.getFloat("zarobok"));
+                    voz.setVynosy(row.getFloat("zarobok"));
                     v.add(voz);
                 }
             } catch (SQLException e) {
@@ -582,8 +582,8 @@ public class Manazment {
         return v;
     }
 
-    public List<Pair<String,Double>> vytazenostZnaciek(){
-        String query= "SELECT\n" +
+    public List<Pair<String, Double>> vytazenostZnaciek() {
+        String query = "SELECT\n" +
                 "   *\n" +
                 "FROM\n" +
                 "    (\n" +
@@ -596,20 +596,50 @@ public class Manazment {
                 "        GROUP BY znacka\n" +
                 "        ORDER BY\n" +
                 "            vytazenost\n" +
-                "    )\n".replace("\n","");
-        ArrayList<Pair<String,Double>> v = new ArrayList<   >();
+                "    )\n".replace("\n", "");
+        ArrayList<Pair<String, Double>> v = new ArrayList<>();
         SQL.run(query, (row) -> {
             try {
                 while (row.next()) {
                     String znacka = ((row.getString(1)));
                     Double vytazenost = ((row.getDouble(2)));
-                    v.add(new Pair<String,Double>(znacka,vytazenost));
+                    v.add(new Pair<String, Double>(znacka, vytazenost));
                 }
             } catch (SQLException e) {
                 e.printStackTrace();
             }
         });
         return v;
+    }
+
+    public int pocetAutZakaznik(@Nullable String from, @Nullable String to, @NotNull String ico) {
+        AtomicInteger retu = new AtomicInteger();
+        String query = "select selectPocetAutZakaznik(" + "'" + from + "','" + to + "','" + ico + "') from dual";
+        System.out.println(query);
+        SQL.run(query, (row) -> {
+            try {
+                retu.set(row.getInt(1));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        });
+        return retu.get();
+    }
+
+    public Pair<Integer, Integer> poctyPreVozidla(@Nullable String from, @Nullable String to, @NotNull Integer id, @NotNull String znacka) {
+        AtomicReference<Pair<Integer, Integer>> p = new AtomicReference<>(new Pair<>(0, 0));
+        String query = "select selectPocetAutZnacka(" + "'" + from + "','" + to + "','" + znacka + "'), selectPocetAutAuto" + "('" + from + "','" + to + "','" + id.toString() + "')" + " from dual";
+        System.out.println(query);
+        SQL.run(query, (row) -> {
+            try {
+                p.set(new Pair<>(row.getInt(1), (row.getInt(2))));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        });
+        return p.get();
     }
 }
 
