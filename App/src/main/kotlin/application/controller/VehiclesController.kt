@@ -5,6 +5,7 @@ import javafx.beans.property.*
 import javafx.scene.chart.*
 import model.*
 import tornadofx.*
+import kotlin.math.*
 
 class VehiclesController : Controller() {
 
@@ -37,7 +38,15 @@ class VehiclesController : Controller() {
                 PieChart.Data("Vyradenie ${(it.vsetky - it.funkcne)}", (it.vsetky - it.funkcne).toDouble())
         ).observable()
     }
-
+    val vytazenostZnaciek = Db.connection.vytazenostZnaciek().let {
+        val suma = it.map { it.second }.sum()
+        it.filter { it.second != .0 }
+                .sortedBy { it.second }
+                .take(round(it.count() * 0.2).toInt())
+                .map {
+                    PieChart.Data(it.first + " ${floor((it.second / suma) * 100)}%", (it.second / suma) * 100)
+                }.observable()
+    }
 
     init {
         update()

@@ -1,4 +1,4 @@
-create or replace function dni_prevadzky_vozidla(p_idVozidla vozidlo.id%type)
+    create or replace function dni_prevadzky_vozidla(p_idVozidla vozidlo.id%type)
 return INTEGER
 IS
 v_pocetDniPrevadzky INTEGER;

@@ -16,10 +16,21 @@ class VehicleState : View("State") {
     override val root = tabpane {
         tab("Stav") {
             paddingAll = 20.0
+
             borderpane {
-                center = piechart("Vozidla", controller.vehiclesChart) {
-                    animated = true
-                }
+              center{
+                    hbox{
+
+                        piechart("Vozidla", controller.vehiclesChart) {
+                            animated = true
+                            paddingAll = 20.0
+                        }
+                        spacer()
+                        piechart("Vytazenost znaciek", controller.vytazenostZnaciek) {
+                            animated = true
+                            paddingAll = 20.0
+                        }
+                    }}
             }
         }
         tab("Vynosy") {

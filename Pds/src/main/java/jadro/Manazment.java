@@ -3,6 +3,7 @@ package jadro;
 import com.google.gson.Gson;
 import db.PdsConnection;
 import db.SQL;
+import kotlin.Pair;
 import model.*;
 import model.Xml.Spolahlivost.ReportXml;
 import model.Xml.Spolahlivost.XmlReport;
@@ -153,7 +154,6 @@ public class Manazment {
         SQL.run("select xmlReport_vozidla_spolahlivost(" + percenta + ") from dual", (resultSet) -> {
             org.w3c.dom.Document doc = null;
             XMLType xml = null;
-
             try {
                 xml = (XMLType) resultSet.getObject(1);
                 doc = xml.getDocument();
@@ -335,22 +335,7 @@ public class Manazment {
         //return SQL.runQueryToList(vyraz);
     }
 
-    //TODO, pre prehladavanie vsetkych udrzieb bude asi treba spravil nejaku proceduru v db. Pripadne to nerobit a robit iba prehladavanie udrzieb konkretneho vozidla
-    //vrati zoznam vyhovujucich udrzieb v podobe zoznamu listu vozidiel. Kazde z tych vozidiel obsahuje jednu udrzbu, ktora je vysledkom tohto dotazu
-    //ak chceme prehladat iba udrzby konkretneho vozidla, tak vo where jednoducho definujeme spz tohto vozidla
-    //pouzitie: ArrayList<Vozidlo> test = (ArrayList<Vozidlo>) man.nacitajUdrzby("where spz = 'SN092HY' and km > 10000", "km", 2, 1);
-    public List<Vozidlo> nacitajUdrzby(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
-        String vyraz = "select * from " +
-                "( select o.*, rownum as rn " +
-                "from ( select a.*, c.id, c.id_cennika, c.spz, c.znacka, c.typ, c.fotka, c.datum_vyradenia from vozidlo c cross join table(c.udrzba) a " + vyrazWhere;
-        if (vyrazOrder.equals("")) {
-            vyraz += " order by od";
-        } else {
-            vyraz += " order by " + vyrazOrder;
-        }
-        vyraz += " ) o ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
-        return SQL.runQueryToList(vyraz);
-    }
+
 
     //pouzitie: ArrayList<Osoba> test = (ArrayList<Osoba>) man.nacitajZakaznikovOsoby("where meno = 'Michaela'", "priezvisko", 10, 1);
     public List<Osoba> nacitajZakaznikovOsoby(String vyrazWhere, String vyrazOrder, int velkostStranky,
@@ -387,20 +372,7 @@ public class Manazment {
      * Vypis vsetkych dat z tabuliek
      */
 
-    @SuppressWarnings("unchecked")
-    public void vypisVozidiel(JList list) {
-        DefaultListModel newModel = new DefaultListModel();
-        SQL.run("select * from vozidlo", (row) -> {
-            try {
-                Vozidlo vozidlo = new Vozidlo(row.getInt("id"), new Cennik(row.getInt("id_cennika")),
-                        row.getString("spz"), row.getString("znacka"), row.getString("typ"), null, row.getDate("datum_vyradenia"));
-                newModel.addElement(vozidlo.toString());
-                list.setModel(newModel);
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
-        });
-    }
+
 
     /*
      * Delete
@@ -608,7 +580,36 @@ public class Manazment {
             }
         });
         return v;
+    }
 
+    public List<Pair<String,Double>> vytazenostZnaciek(){
+        String query= "SELECT\n" +
+                "   *\n" +
+                "FROM\n" +
+                "    (\n" +
+                "        SELECT\n" +
+                "            znacka,\n" +
+                "            (SUM(vytazenost_vozidla(id))) AS vytazenost\n" +
+                "        FROM\n" +
+                "            ( vozidlo ) v\n" +
+                "         \n" +
+                "        GROUP BY znacka\n" +
+                "        ORDER BY\n" +
+                "            vytazenost\n" +
+                "    )\n".replace("\n","");
+        ArrayList<Pair<String,Double>> v = new ArrayList<   >();
+        SQL.run(query, (row) -> {
+            try {
+                while (row.next()) {
+                    String znacka = ((row.getString(1)));
+                    Double vytazenost = ((row.getDouble(2)));
+                    v.add(new Pair<String,Double>(znacka,vytazenost));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        return v;
     }
 }
 
