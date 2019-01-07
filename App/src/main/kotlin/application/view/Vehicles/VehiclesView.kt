@@ -33,7 +33,7 @@ class VehiclesView : View("Vehicles") {
                     column("Naklady", VehicleModel::naklady)
                     column("Vynosy", VehicleModel::vynosy)
                     column("Poruchovost", VehicleModel::poruchovost) {
-                       converter(Conv { (it).toString() + "%" })
+                       //converter(Conv { (it).toString() + "%" })
                    }
                     column("Cena den", VehicleModel::cennik) {
                         converter(Conv { floor(it.cena_den).toString() + "$" })

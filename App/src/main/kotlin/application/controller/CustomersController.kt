@@ -3,6 +3,7 @@ package application.controller
 import application.model.*
 import javafx.beans.property.*
 import javafx.collections.*
+import javafx.concurrent.*
 import model.*
 import tornadofx.*
 
@@ -28,7 +29,7 @@ class CustomersController : Controller() {
     }
 }
 
-class TableModel<T>(private val getCurrent: (Int) -> List<T>) {
+open class TableModel<T>(private val getCurrent: (Int) -> List<T>) {
 
     val list = FXCollections.observableArrayList<T>()
     val page = SimpleIntegerProperty(1)
@@ -45,6 +46,6 @@ class TableModel<T>(private val getCurrent: (Int) -> List<T>) {
 
     }
 
-    fun current(apage:Int =1) = runAsync { getCurrent(apage).let(list::setAll) }
-
+    open fun current(apage: Int = 1) = runAsync { getCurrent(apage).let(list::setAll) }
 }
+

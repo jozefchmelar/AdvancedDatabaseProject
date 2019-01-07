@@ -29,4 +29,4 @@ class PricingModel : ItemViewModel<Cennik> {
 }
 
 fun Date.toLocalDate(): LocalDate = LocalDate.now() //this?.toInstant().let { LocalDateTime.ofInstant(it,ZoneId.systemDefault()) }.let { LocalDate.of(it.year,it.month,it.dayOfMonth) } ?: LocalDate.now()
-fun LocalDate.toDate() = Date(toEpochDay())
+fun LocalDate.toDate() = Date.from(this.atStartOfDay(ZoneId.systemDefault()).toInstant())

@@ -1,0 +1,282 @@
+create or replace function dni_prevadzky_vozidla(p_idVozidla vozidlo.id%type)
+return INTEGER
+IS
+v_pocetDniPrevadzky INTEGER;
+BEGIN
+
+        select sum(vyp.do - vyp.od) into v_pocetDniPrevadzky from vozidlo v join vypozicka vyp on v.id = vyp.id_vozidla
+        where v.id = p_idVozidla
+        group by vyp.id_vozidla;
+        
+        if v_pocetDniPrevadzky is null then
+            v_pocetDniPrevadzky := 0;
+        end if;
+        
+--        select case when v.datum_vyradenia is null then round(sysdate - min(vyp.od)) 
+--            else round(v.datum_vyradenia - min(vyp.od))
+--            end into v_pocetDniPrevadzky
+--        from vozidlo v join vypozicka vyp on v.id = vyp.id_vozidla
+--        where v.id = p_idVozidla
+--        group by v.id, vyp.id_vozidla, datum_vyradenia;
+        
+return v_pocetDniPrevadzky;
+END dni_prevadzky_vozidla;
+/
+
+
+
+create or replace function dni_oprav_vozidla(p_idVozidla vozidlo.id%type)
+return INTEGER
+IS
+t_vozidlo_rec vozidlo%rowtype;
+v_pocetDniOprav INTEGER;
+BEGIN
+        select sum(u.do - u.od) into v_pocetDniOprav from vozidlo v cross join table (v.udrzba) u where id = p_idVozidla;
+        
+        if v_pocetDniOprav is null then
+            v_pocetDniOprav := 0;
+       end if;  
+return v_pocetDniOprav;
+END dni_oprav_vozidla;
+/
+
+
+
+
+create or replace function spolahlivost_vozidla(p_idVozidla vozidlo.id%type)
+return FLOAT
+IS
+t_vozidlo_rec vozidlo%rowtype;
+v_pocetDniPrevadzky INTEGER;
+v_pocetDniOpravy INTEGER;
+v_spolahlivost FLOAT;
+BEGIN
+    --Rataju sa iba vozidla, ktore boli aspon raz pozicane. Spolahlivost sa vypocita pomerom medzi poctom dni v prevadzke a poctom dni v opravach. Prevadzkou sa rozumie pocet dni, pre ktore bolo auto vypozicane
+    
+    select * into t_vozidlo_rec from vozidlo v where exists (select 'x' from vypozicka vyp where v.id = vyp.id_vozidla) and v.id = p_idVozidla;
+    
+--    if t_vozidlo_rec.datum_vyradenia is null then
+--        select sysdate - min(od) into v_pocetDniPrevadzky from vypozicka where id_vozidla = p_idVozidla;
+--    else
+--        select t_vozidlo_rec.datum_vyradenia - min(od) into v_pocetDniPrevadzky from vypozicka where id_vozidla = p_idVozidla;
+--    end if;
+    
+    select sum(vyp.do - vyp.od) into v_pocetDniPrevadzky from vozidlo v join vypozicka vyp on v.id = vyp.id_vozidla
+        where v.id = p_idVozidla
+        group by vyp.id_vozidla;
+        
+    if v_pocetDniPrevadzky is null then
+       v_pocetDniPrevadzky := 0;
+     end if;
+    
+    if t_vozidlo_rec.udrzba is null then
+        v_pocetDniOpravy := 0;
+    else 
+        select sum(u.do - u.od) into v_pocetDniOpravy from vozidlo v cross join table (v.udrzba) u where id = p_idVozidla;
+    end if;
+      
+    if v_pocetDniOpravy = 0 then
+        v_spolahlivost := v_pocetDniPrevadzky;
+    else 
+        v_spolahlivost := v_pocetDniPrevadzky/v_pocetDniOpravy;
+    end if;
+return v_spolahlivost;
+END spolahlivost_vozidla;
+/
+
+
+create or replace function xmlReport_vozidla_spolahlivost(p_percento FLOAT)
+return xmlType
+IS
+v_title VARCHAR2(255);
+v_xml_report xmlType;
+v_percenta VARCHAR2(255);
+BEGIN
+    if p_percento < 0.01 then
+        v_percenta := 0||p_percento*100;
+    else 
+        v_percenta := p_percento*100;
+    end if;
+     
+    select xmlRoot( xmlElement("report", xmlForest('Vypis '||v_percenta||'% najspolahlivejsich vozidiel' as "title"), 
+        xmlAgg(xmlElement("vozidlo", xmlAttributes(voz.poradie as "poradie", voz.spolahlivost as "koeficient_spolahlivosti"), 
+            xmlForest(REPLACE(voz.spz, ' ', '') as "spz", REPLACE(voz.znacka, ' ', '') as "znacka", REPLACE(voz.typ, ' ', '') as "typ", voz.dniPrevadzky as "dni_prevadzky", voz.dniOprav as "dni_oprav")) order by voz.poradie )
+    ),version '1.0') as xml into v_xml_report 
+    from (
+            select s.*, rank() over (order by spolahlivost DESC) as poradie
+                from(
+                        select v.*, spolahlivost_vozidla(v.id) as spolahlivost, dni_oprav_vozidla(v.id) as dniOprav, dni_prevadzky_vozidla(v.id) as dniPrevadzky  from vozidlo v where exists( select 'x' from vypozicka vyp where v.id = vyp.id_vozidla)
+                    ) s
+        ) voz where poradie < round(p_percento*(select count(distinct v.id) from vozidlo v join vypozicka vyp on v.id = vyp.id_vozidla));
+
+return v_xml_report;
+END xmlReport_vozidla_spolahlivost;
+/
+
+
+insert into xml_reports (report_id, report) select 2, xmlReport_vozidla_spolahlivost(0.01) from dual;
+
+
+
+create or replace function xmlReport_vozidla_vynosy(p_percento FLOAT)
+return xmlType
+IS
+v_title VARCHAR2(255);
+v_xml_report xmlType;
+BEGIN
+    select xmlRoot( xmlElement("report", xmlForest('Vypis vozidiel' as "title"), xmlAgg(xmlElement("vozidlo", xmlAttributes(voz.poradie as "poradie"), xmlForest(round(voz.zarobok, 2) as "zarobok",REPLACE(voz.spz, ' ', '') as "spz", REPLACE(voz.znacka, ' ', '') as "znacka", REPLACE(voz.typ, ' ', '') as "typ")) order by voz.poradie )
+    ),version '1.0') as xml into v_xml_report 
+    from (
+            select s.*, rank() over (order by zarobok DESC) as poradie
+                from(
+                        select v.*, zarobok_vozidla(id) as zarobok from vozidlo v
+                    ) s
+        ) voz where poradie < round(p_percento*(select count(distinct id) from vozidlo));
+
+
+return v_xml_report;
+END xmlReport_vozidla_vynosy;
+/
+
+create or replace function zarobok_vozidla(p_idVozidla vozidlo.id%type)
+return FLOAT
+IS
+t_vozidlo_rec vozidlo%rowtype;
+v_naklady FLOAT;
+v_zisky FLOAT;
+v_zarobok FLOAT;
+BEGIN
+
+    select * into t_vozidlo_rec from vozidlo where id = p_idVozidla;
+    IF t_vozidlo_rec.udrzba is null then
+         v_naklady := 0;
+    else 
+            select sum(u.cena) into v_naklady from vozidlo v cross join table (v.udrzba) u
+            where v.id = p_idVozidla
+            group by v.id;
+    end if;
+    
+    select sum(f.suma) into v_zisky from vozidlo v join vypozicka vy on v.id=vy.id_vozidla join faktura f on f.id_vypozicky = vy.id
+          where v.id = p_idVozidla;
+    
+    if v_zisky is null then
+        v_zisky := 0;
+    end if;
+    
+    v_zarobok := v_zisky - v_naklady;
+return v_zarobok;
+END zarobok_vozidla;
+/
+
+
+create or replace function naklady_vozidla(p_idVozidla vozidlo.id%type)
+return FLOAT
+IS
+t_vozidlo_rec vozidlo%rowtype;
+v_naklady FLOAT;
+BEGIN
+
+    select * into t_vozidlo_rec from vozidlo where id = p_idVozidla;
+    
+    IF t_vozidlo_rec.udrzba is null then
+         v_naklady := 0;
+    else 
+            select sum(u.cena) into v_naklady from vozidlo v cross join table (v.udrzba) u
+            where v.id = p_idVozidla
+            group by v.id;
+    end if;
+return v_naklady;
+END naklady_vozidla;
+/
+
+create or replace function vynosy_vozidla(p_idVozidla vozidlo.id%type)
+return FLOAT
+IS
+t_vozidlo_rec vozidlo%rowtype;
+v_vynosy FLOAT;
+BEGIN
+
+    select * into t_vozidlo_rec from vozidlo where id = p_idVozidla;
+    
+    select sum(f.suma) into v_vynosy from vozidlo v join vypozicka vy on v.id=vy.id_vozidla join faktura f on f.id_vypozicky = vy.id
+          where v.id = p_idVozidla;
+    
+    if v_vynosy is null then
+        v_vynosy := 0;
+    end if;
+return v_vynosy;
+END vynosy_vozidla;
+/
+
+
+create or replace function poruchovost_vozidla(p_idVozidla vozidlo.id%type)
+return FLOAT
+IS
+t_vozidlo_rec vozidlo%rowtype;
+v_pocetDniPrevadzky INTEGER;
+v_pocetDniOpravy INTEGER;
+v_poruchovost FLOAT;
+BEGIN
+    --Rataju sa iba vozidla, ktore boli aspon raz pozicane. Poruchovost sa vypocita pomerom medzi poctom dni v prevadzke a poctom dni v opravach. Prevadzkou sa rozumie pocet dni od prvej vypozicky po datum vyradenia, alebo po aktualny datum
+    
+    select * into t_vozidlo_rec from vozidlo v where exists (select 'x' from vypozicka vyp where v.id = vyp.id_vozidla) and v.id = p_idVozidla;
+    
+    if t_vozidlo_rec.datum_vyradenia is null then
+        select sysdate - min(od) into v_pocetDniPrevadzky from vypozicka where id_vozidla = p_idVozidla;
+    else
+        select t_vozidlo_rec.datum_vyradenia - min(od) into v_pocetDniPrevadzky from vypozicka where id_vozidla = p_idVozidla;
+    end if;
+        
+    if v_pocetDniPrevadzky is null then
+       v_pocetDniPrevadzky := 0;
+     end if;
+    
+    if t_vozidlo_rec.udrzba is null then
+        v_pocetDniOpravy := 0;
+    else 
+        select sum(u.do - u.od) into v_pocetDniOpravy from vozidlo v cross join table (v.udrzba) u where id = p_idVozidla;
+    end if;
+      
+    if v_pocetDniOpravy = 0 then
+        v_poruchovost := v_pocetDniPrevadzky;
+    else 
+        v_poruchovost := v_pocetDniPrevadzky/v_pocetDniOpravy;
+    end if;
+return v_poruchovost;
+END poruchovost_vozidla;
+/
+
+create or replace function vytazenost_vozidla(p_idVozidla vozidlo.id%type)
+return FLOAT
+IS
+t_vozidlo_rec vozidlo%rowtype;
+v_pocetDniPrevadzky INTEGER;
+v_pocetDniVypoziciek INTEGER;
+v_vytazenost FLOAT;
+BEGIN
+    --Rataju sa iba vozidla, ktore boli aspon raz pozicane. Vytazenost sa vypocita pomerom medzi poctom dni v prevadzke a poctom dni vo vypozickach. Prevadzkou sa rozumie pocet dni od prvej vypozicky po datum vyradenia, alebo po aktualny datum
+    
+    select * into t_vozidlo_rec from vozidlo v where exists (select 'x' from vypozicka vyp where v.id = vyp.id_vozidla) and v.id = p_idVozidla;
+    
+    if t_vozidlo_rec.datum_vyradenia is null then
+        select sysdate - min(od) into v_pocetDniPrevadzky from vypozicka where id_vozidla = p_idVozidla;
+    else
+        select t_vozidlo_rec.datum_vyradenia - min(od) into v_pocetDniPrevadzky from vypozicka where id_vozidla = p_idVozidla;
+    end if;
+        
+    if v_pocetDniPrevadzky is null then
+       v_pocetDniPrevadzky := 0;
+     end if;
+    
+    select sum(vyp.do - vyp.od) into v_pocetDniVypoziciek from vozidlo v join vypozicka vyp on v.id = vyp.id_vozidla
+    where v.id = p_idVozidla
+    group by vyp.id_vozidla;
+    
+    if v_pocetDniVypoziciek = 0 then
+       v_pocetDniVypoziciek := 1;
+     end if;
+      
+        v_vytazenost := v_pocetDniPrevadzky/v_pocetDniVypoziciek;
+return v_vytazenost;
+END vytazenost_vozidla;
+/

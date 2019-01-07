@@ -93,7 +93,7 @@ class VehicleState : View("State") {
 
                         }
             }
-
         }
+        tab(VehiclesWithouProfit::class)
     }
 }

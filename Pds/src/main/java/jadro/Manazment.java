@@ -129,17 +129,17 @@ public class Manazment {
         return SQL.runInsertQuery(firma);
     }
 
-    public PoctyVozidiel poctyVozidiel(){
-        String vsetky   = "count (*),";
-        String funkcne  = "sum(case when datum_vyradenia is not null then 0 else 1 end)";
-        String query =   "select "
-                +vsetky
-                +funkcne+
+    public PoctyVozidiel poctyVozidiel() {
+        String vsetky = "count (*),";
+        String funkcne = "sum(case when datum_vyradenia is not null then 0 else 1 end)";
+        String query = "select "
+                + vsetky
+                + funkcne +
                 " from vozidlo";
         final PoctyVozidiel[] poctyVozidiel = {null};
-        SQL.run(query,(row)->{
+        SQL.run(query, (row) -> {
             try {
-                 poctyVozidiel[0] = new PoctyVozidiel(row.getInt(1), row.getInt(2));
+                poctyVozidiel[0] = new PoctyVozidiel(row.getInt(1), row.getInt(2));
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -148,9 +148,9 @@ public class Manazment {
 
     }
 
-    public XmlReport<ReportXml> spolahlivostVozidiel(double percenta){
+    public XmlReport<ReportXml> spolahlivostVozidiel(double percenta) {
         AtomicReference<XmlReport<ReportXml>> toReturn = new AtomicReference<>();
-        SQL.run("select xmlReport_vozidla_spolahlivost("+percenta+") from dual", (resultSet) -> {
+        SQL.run("select xmlReport_vozidla_spolahlivost(" + percenta + ") from dual", (resultSet) -> {
             org.w3c.dom.Document doc = null;
             XMLType xml = null;
 
@@ -161,7 +161,7 @@ public class Manazment {
                 JSONObject jsonReport = XML.toJSONObject(stringFromDocument);
                 ReportXml report = gson.fromJson(jsonReport.toString(), ReportXml.class);
                 toReturn.set(new XmlReport<>(report, jsonReport.toString(), stringFromDocument));
-             } catch (SQLException e) {
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
 
@@ -169,9 +169,9 @@ public class Manazment {
         return toReturn.get();
     }
 
-    public XmlReport<ReportXml> vynosyVozidiel(double percenta){
+    public XmlReport<ReportXml> vynosyVozidiel(double percenta) {
         AtomicReference<XmlReport<ReportXml>> toReturn = new AtomicReference<>();
-        SQL.run("select xmlReport_vozidla_vynosy("+percenta+") from dual", (resultSet) -> {
+        SQL.run("select xmlReport_vozidla_vynosy(" + percenta + ") from dual", (resultSet) -> {
             org.w3c.dom.Document doc = null;
             XMLType xml = null;
 
@@ -212,7 +212,7 @@ public class Manazment {
     public List<Vozidlo> nacitajVozidla(String vyrazWhere, String vyrazOrder, int velkostStranky, int indexStranky) {
         String vyraz = "select * from" +
                 "( select v.*, naklady_vozidla(v.id) as naklady ,vynosy_vozidla(v.id) as vynosy ,y.cena_den, rownum as rn " +
-                "from ( select id,id_cennika,spz,znacka,typ,fotka,udrzba,datum_vyradenia, vytazenost_vozidla(id) as vytazenost ,poruchovost_vozidla(id) as poruchovost  from vozidlo   " + vyrazWhere;
+                "from ( select id,id_cennika,spz,znacka,typ,fotka,udrzba,datum_vyradenia, vytazenost_vozidla(id) as vytazenost ,poruchovost_vozidla(id) as poruchovost  from vozidlo where poruchovost_vozidla(id)  >= 0  " + vyrazWhere;
         if (vyrazOrder.equals("")) {
             vyraz += " order by datum_vyradenia";
         } else {
@@ -287,7 +287,7 @@ public class Manazment {
                             p.getDouble("poplatok"), p.getDate("platny_od"), p.getDate("platny_do"));
 //                    resultList.add(cennik);
                 }
-            }  catch (SQLException e) {
+            } catch (SQLException e) {
                 e.printStackTrace();
             }
         });
@@ -569,5 +569,47 @@ public class Manazment {
         return SQL.runUpdateQuery(vyraz);
     }
 
+    /*
+
+     String vyraz = "select * from" +
+                "( select v.*, naklady_vozidla(v.id) as naklady ,vynosy_vozidla(v.id) as vynosy ,y.cena_den, rownum as rn " +
+                "from ( select id,id_cennika,spz,znacka,typ,fotka,udrzba,datum_vyradenia, vytazenost_vozidla(id) as vytazenost ,poruchovost_vozidla(id) as poruchovost  from vozidlo where poruchovost_vozidla(id)  >= 0  " + vyrazWhere;
+        if (vyrazOrder.equals("")) {
+            vyraz += " order by datum_vyradenia";
+        } else {
+            vyraz += " order by " + vyrazOrder;
+        }
+        vyraz += " ) v JOIN cennik y on v.id_cennika = y.id ) where rn between " + ((indexStranky) * velkostStranky - velkostStranky) + " and " + velkostStranky * indexStranky;
+
+
+    * */
+    public List<Vozidlo> vozidlaBezZisku(String from, String to, int velkostStranky, int indexStranky) {
+        String vyraz = "select id,spz,zarobok from " +
+                "    (   select id,spz, zarobok_vozidla_datum(id,'"+from+"','"+to+"') as zarobok, rownum as rn " +
+                "        from ( vozidlo) v " +
+                "        where zarobok_vozidla_datum(id,'"+from+"','"+to+"') <= 0 " +
+                "        order by zarobok " +
+                "    )  where rn between  + (("+indexStranky+") * "+velkostStranky+" - "+velkostStranky+")   and   "+velkostStranky+" * "+indexStranky;
+
+
+        System.out.println(vyraz);
+        System.out.println();
+        ArrayList<Vozidlo> v = new ArrayList<>();
+        SQL.run(vyraz, (row) -> {
+            try {
+                while (row.next()) {
+                    Vozidlo voz = new Vozidlo((row.getInt(1)));
+                    voz.setSpz(row.getString("spz"));
+                    voz.setVynosy( row.getFloat("zarobok"));
+                    v.add(voz);
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        return v;
+
+    }
 }
+
 
