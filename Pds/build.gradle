@@ -1,5 +1,6 @@
 dependencies {
     compile files("./lib/ojdbc6.jar")
     compile files("./lib/xdb6.jar")
+    compile files("./lib/xmlparserv2.jar")
     testCompile group: 'junit', name: 'junit', version: '4.12'
 }

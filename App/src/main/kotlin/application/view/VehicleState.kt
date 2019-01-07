@@ -21,7 +21,6 @@ class VehicleState : View("Stete") {
             borderpane {
                 center = piechart("Vozidla", controller.vehiclesChart) {
                     animated = true
-
                 }
             }
         }

@@ -16,7 +16,20 @@ public class Main {
     public static void main(String[] args) {
 
 
-    //    SQL.run("select x.report_one from xml_reports x");
+         SQL.run("select xmlReport_vozidla_spolahlivost(0.01) from dual", (resultSet)->{
+             org.w3c.dom.Document  doc = null;
+             XMLType xml = null;
+
+             try {
+                 xml = (XMLType) resultSet.getObject(1);
+                 doc = xml.getDocument();
+                 System.out.println("DOM Implementation is " + doc.getClass().getName());
+                 System.out.println();
+             } catch (SQLException e) {
+                 e.printStackTrace();
+             }
+
+         });
         //QL.test("select x.report_one from xml_reports x");
 
 //        SQL.run("drop table test");

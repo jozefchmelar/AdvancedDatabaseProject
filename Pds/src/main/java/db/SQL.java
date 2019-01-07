@@ -2,6 +2,8 @@ package db;
 
 import jadro.PodporovaneTypy;
 import model.*;
+import oracle.jdbc.OraclePreparedStatement;
+import oracle.jdbc.OracleResultSet;
 
 import java.io.*;
 import java.sql.*;
@@ -24,10 +26,10 @@ final public class SQL {
 
     }
 
-    public static void run(String query, Consumer<ResultSet> onResult) {
+    public static void run(String query, Consumer<OracleResultSet> onResult) {
         try {
-            PreparedStatement ps = PdsConnection.getInstance().getConnection().prepareStatement(query);
-            ResultSet p = ps.executeQuery();
+            OraclePreparedStatement ps = (OraclePreparedStatement) PdsConnection.getInstance().getConnection().prepareStatement(query);
+            OracleResultSet p = (OracleResultSet) ps.executeQuery();
           //  p.next();
          //   System.out.println(p.getSQLXML("report_one").getString());
             if (onResult != null) {
