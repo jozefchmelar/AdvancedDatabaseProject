@@ -8,12 +8,13 @@ import javafx.scene.layout.*
 import javafx.util.*
 import tableviewpag
 import tornadofx.*
+import kotlin.math.*
 
 class RentalView : View("Rental") {
     private val controller: RentalController by inject()
     val selectedRental = RentalModel()
     override val root = borderpane {
-        padding = Insets(20.0)
+        paddingAll = 20.0
 
         center = tabpane {
             tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
@@ -32,19 +33,21 @@ class RentalView : View("Rental") {
                     }
                     onSelectionChange {
                         val selected = it?.item
-                        if(selected!=null){
-                         //   controller.getDetails(selected)
+                        if (selected != null) {
+                            //   controller.getDetails(selected)
                         }
                     }
                     smartResize()
                 }
             }
-           tab(RentalNewRentalView::class)
+            tab(RentalNewRentalView::class)
         }
     }
 }
 
-class Conv<T>(val p: (T) -> String) : StringConverter<T>() {
+fun toEur(value: Double) = Conv<Double> { floor(it).toString() + " $" }
+
+open class Conv<T>(val p: (T) -> String) : StringConverter<T>() {
     override fun toString(`object`: T?): String {
         return `object`?.let { p(it) } ?: "N/A"
     }

@@ -18,15 +18,11 @@ class VehiclesController : Controller() {
         vehicles.current()
     }
 
-    val pricing = TableModel { Db.connection.nacitajCenniky("", "", 10, it).map(::PricingModel) }
+    val pricing  = TableModel { Db.connection.nacitajCenniky("", "", 10, it).map(::PricingModel) }
 
-    val vehicles = TableModel {
-        Db.connection.nacitajVozidla(" ", "", 25, it)
-                .also {
-                    println(it)
-                }
-                .map(::VehicleModel)
-    }
+    val vehicles = TableModel { Db.connection.nacitajVozidla(" ", "", 25, it).map(::VehicleModel) }
+    val vehiclesUsage = TableModel { Db.connection.nacitajVozidla(" ", "vytazenost", 25, it).map(::VehicleModel) }
+    val vehiclesFault = TableModel { Db.connection.nacitajVozidla(" ", "poruchovost", 25, it).map(::VehicleModel) }
 
     val vehiclesChart = Db.connection.poctyVozidiel().let {
         listOf(PieChart.Data("Funkcne ${it.funkcne}", it.funkcne.toDouble()),
@@ -36,9 +32,13 @@ class VehiclesController : Controller() {
 
 
     init {
+        update()
+    }
+    fun update(){
         vehicles.current()
         pricing.current()
-        println()
+        vehiclesUsage.current()
+        vehiclesFault.current()
     }
 }
 

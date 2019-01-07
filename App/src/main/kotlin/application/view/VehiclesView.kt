@@ -5,7 +5,8 @@ import application.model.*
 import javafx.geometry.*
 import tableviewpag
 import tornadofx.*
-
+import kotlin.math.*
+enum class VehicleSOrt {Poruchovost,Vytazenost}
 class VehiclesView : View("Vehicles") {
     private val controller: VehiclesController by inject()
     val priceController: PricingController by inject()
@@ -32,8 +33,11 @@ class VehiclesView : View("Vehicles") {
                     column("typ", VehicleModel::typ)
                     column("Naklady", VehicleModel::naklady)
                     column("Vynosy", VehicleModel::vynosy)
-                    column("Cena den", VehicleModel::cennik){
-                        converter(Conv{it.cena_den.toString()})
+                    column("Poruchovost", VehicleModel::poruchovost) {
+                        converter(Conv { (it).toString() + "%" })
+                    }
+                    column("Cena den", VehicleModel::cennik) {
+                        converter(Conv { floor(it.cena_den).toString() + "$" })
                     }
 
                     bindSelected(selectedVehicle)

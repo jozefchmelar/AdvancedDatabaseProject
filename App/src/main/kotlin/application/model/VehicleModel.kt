@@ -22,6 +22,8 @@ class VehicleModel : ItemViewModel<Vozidlo> {
     val typ = bind(Vozidlo::getTyp)
     val naklady = bind(Vozidlo::getNaklady)
     val vynosy = bind(Vozidlo::getVynosy)
+    val poruchovost = bind(Vozidlo::getPoruchovost)
+    val vytazenost = bind(Vozidlo::getVytazenost)
 
     val fotkaCesta = bind {
         var toReturn: SimpleObjectProperty<Image> = Image(FileInputStream(File("no_image.jpg"))).toProperty()

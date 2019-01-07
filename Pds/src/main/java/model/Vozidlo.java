@@ -19,6 +19,8 @@ public class Vozidlo {
 
 
     private Float vynosy;
+    private Float poruchovost;
+    private Float vytazenost;
     private Float naklady;
 
     public Vozidlo(int id) {
@@ -77,6 +79,22 @@ public class Vozidlo {
 
     public void setZnacka(String znacka) {
         this.znacka = znacka;
+    }
+
+    public Float getVytazenost() {
+        return vytazenost;
+    }
+
+    public void setVytazenost(Float vytazenost) {
+        this.vytazenost = vytazenost;
+    }
+
+    public Float getPoruchovost() {
+        return poruchovost;
+    }
+
+    public void setPoruchovost(Float poruchovost) {
+        this.poruchovost = poruchovost;
     }
 
     public String getTyp() {

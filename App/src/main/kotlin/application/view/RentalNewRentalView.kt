@@ -6,6 +6,7 @@ import javafx.beans.property.*
 import javafx.geometry.*
 import tableviewpag
 import tornadofx.*
+import kotlin.math.*
 
 class RentalNewRentalView : View("Rental") {
 
@@ -44,7 +45,7 @@ class RentalNewRentalView : View("Rental") {
                         tableviewpag(costumer.people) {
                             smartResize()
                             column("First name", PersonModel::meno).apply { isSortable = false }
-                            column("Last name",  PersonModel::priezvisko).apply { isSortable = false }
+                            column("Last name", PersonModel::priezvisko).apply { isSortable = false }
                             column("Birth nubmer", PersonModel::rodCislo).apply { isSortable = false }
                             column("Contatc", PersonModel::kontakt).apply { isSortable = false }
                             disableProperty().bind(rental.isRentingCompany)
@@ -62,8 +63,8 @@ class RentalNewRentalView : View("Rental") {
                             column("spz", VehicleModel::spz)
                             column("znacka", VehicleModel::znacka)
                             column("typ", VehicleModel::typ)
-                             column("Cena den", VehicleModel::cennik){
-                                converter(Conv{it.cena_den.toString()})
+                            column("Cena den", VehicleModel::cennik) {
+                                converter(Conv { floor(it.cena_den).toString() + "$" })
                             }
 
                             bindSelected(selectedVehicle)
@@ -113,8 +114,8 @@ class RentalNewRentalView : View("Rental") {
                             center {
                                 paddingAll = 24.0
                                 vbox {
-                                    button("Rent"){
-                                        action{
+                                    button("Rent") {
+                                        action {
                                             rental.commit()
                                             controller.rent(rental.item)
                                         }
