@@ -1,4 +1,4 @@
-package application.view
+package application.view.Customers
 
 import application.controller.*
 import application.model.*

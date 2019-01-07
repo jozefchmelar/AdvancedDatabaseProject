@@ -1,24 +1,13 @@
-package application.view
+package application.view.Vehicles
 
 import application.controller.*
 import application.model.*
 import javafx.beans.property.*
-import javafx.scene.*
-import javafx.scene.control.*
 import javafx.scene.image.*
 import javafx.stage.*
 import tableviewpag
 import tornadofx.*
 import java.io.*
-
-class AllVehicels : View("Vehicles") {
-    override val root = tabpane {
-        tabClosingPolicy = TabPane.TabClosingPolicy.UNAVAILABLE
-        tab(VehiclesView::class)
-        tab(NewVehicleView::class)
-        tab(VehicleState::class)
-    }
-}
 
 class NewVehicleView : View("New vehicle") {
     private val controller: VehiclesController by inject()

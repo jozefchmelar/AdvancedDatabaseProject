@@ -1,10 +1,15 @@
 package jadro;
 
+import com.google.gson.Gson;
 import db.SQL;
 import model.Cennik;
 import model.Udrzba;
 import model.Vozidlo;
+import model.Xml.Spolahlivost.Report;
+import model.Xml.Spolahlivost.ReportXml;
 import oracle.xdb.XMLType;
+import org.json.JSONObject;
+import org.json.XML;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -15,21 +20,23 @@ public class Main {
 
     public static void main(String[] args) {
 
+        Gson gson = new Gson();
+        SQL.run("select xmlReport_vozidla_spolahlivost(0.01) from dual", (resultSet) -> {
+            org.w3c.dom.Document doc = null;
+            XMLType xml = null;
+            try {
+                xml = (XMLType) resultSet.getObject(1);
+                doc = xml.getDocument();
+                String stringFromDocument = Xml.getStringFromDocument(doc);
+                JSONObject jsonReport = XML.toJSONObject(stringFromDocument);
+                System.out.println(jsonReport.toString());
+                ReportXml report = gson.fromJson(jsonReport.toString(), ReportXml.class);
+                System.out.println();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
 
-         SQL.run("select xmlReport_vozidla_spolahlivost(0.01) from dual", (resultSet)->{
-             org.w3c.dom.Document  doc = null;
-             XMLType xml = null;
-
-             try {
-                 xml = (XMLType) resultSet.getObject(1);
-                 doc = xml.getDocument();
-                 System.out.println("DOM Implementation is " + doc.getClass().getName());
-                 System.out.println();
-             } catch (SQLException e) {
-                 e.printStackTrace();
-             }
-
-         });
+        });
         //QL.test("select x.report_one from xml_reports x");
 
 //        SQL.run("drop table test");
@@ -43,7 +50,6 @@ public class Main {
         //vozidlo.getUdrzby().add(new Udrzba(1, 2, new GregorianCalendar(1986, Calendar.SEPTEMBER, 29).getTime(), new GregorianCalendar(1986, Calendar.SEPTEMBER, 29).getTime(), "popis1"));
         //vozidlo.getUdrzby().add(new Udrzba(2, 3, new GregorianCalendar(1986, Calendar.SEPTEMBER, 29).getTime(), new GregorianCalendar(1986, Calendar.SEPTEMBER, 29).getTime(), "popis2"));
         //int vysl = SQL.runInsertQuery(vozidlo);
-
 
 
 //        SQL.run("select * from test", (row) -> {

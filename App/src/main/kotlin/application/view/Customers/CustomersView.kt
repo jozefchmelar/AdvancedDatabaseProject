@@ -1,10 +1,8 @@
-package application.view
+package application.view.Customers
 
 import application.controller.*
 import application.model.*
-import javafx.geometry.*
 import javafx.scene.control.*
-import javafx.scene.layout.*
 import tornadofx.*
 
 class CustomersView : View("Customers") {

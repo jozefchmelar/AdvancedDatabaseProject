@@ -1,12 +1,11 @@
-package application.view
+package application.view.Vehicles
 
 import application.controller.*
 import application.model.*
-import javafx.geometry.*
+import application.view.Rental.*
 import tableviewpag
 import tornadofx.*
 import kotlin.math.*
-enum class VehicleSOrt {Poruchovost,Vytazenost}
 class VehiclesView : View("Vehicles") {
     private val controller: VehiclesController by inject()
     val priceController: PricingController by inject()
@@ -34,8 +33,8 @@ class VehiclesView : View("Vehicles") {
                     column("Naklady", VehicleModel::naklady)
                     column("Vynosy", VehicleModel::vynosy)
                     column("Poruchovost", VehicleModel::poruchovost) {
-                        converter(Conv { (it).toString() + "%" })
-                    }
+                       converter(Conv { (it).toString() + "%" })
+                   }
                     column("Cena den", VehicleModel::cennik) {
                         converter(Conv { floor(it.cena_den).toString() + "$" })
                     }

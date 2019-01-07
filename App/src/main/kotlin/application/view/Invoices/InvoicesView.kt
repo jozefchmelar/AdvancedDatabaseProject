@@ -1,14 +1,13 @@
-package application.view
+package application.view.Invoices
 
 import application.controller.*
 import application.model.*
+import application.view.Rental.*
 import javafx.beans.property.*
 import javafx.geometry.*
 import javafx.scene.layout.*
-import javafx.util.*
 import tableviewpag
 import tornadofx.*
-import kotlin.reflect.jvm.*
 
 class InvoicesView : View("Invoices") {
     private val controller: InvoiceController by inject()

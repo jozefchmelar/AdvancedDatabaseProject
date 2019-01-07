@@ -9,7 +9,6 @@ fun <T> EventTarget.tableviewpag(items: TableModel<T>, op: TableView<T>.() -> Un
     vgrow = Priority.ALWAYS
     tableview(items.list) {
         vgrow = Priority.ALWAYS
-
         op()
     }
     borderpane {

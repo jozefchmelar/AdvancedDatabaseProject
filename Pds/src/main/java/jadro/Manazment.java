@@ -1,8 +1,14 @@
 package jadro;
 
+import com.google.gson.Gson;
 import db.PdsConnection;
 import db.SQL;
 import model.*;
+import model.Xml.Spolahlivost.ReportXml;
+import model.Xml.Spolahlivost.XmlReport;
+import oracle.xdb.XMLType;
+import org.json.JSONObject;
+import org.json.XML;
 
 import javax.swing.*;
 import java.io.File;
@@ -13,6 +19,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 
 /*
@@ -24,6 +31,7 @@ public class Manazment {
     private Vypozicka vypozicka;
     private Zakaznik zakaznik;
     private Faktura faktura;
+    private Gson gson = new Gson();
 
     public Manazment() {
     }
@@ -139,6 +147,49 @@ public class Manazment {
         return poctyVozidiel[0];
 
     }
+
+    public XmlReport<ReportXml> spolahlivostVozidiel(double percenta){
+        AtomicReference<XmlReport<ReportXml>> toReturn = new AtomicReference<>();
+        SQL.run("select xmlReport_vozidla_spolahlivost("+percenta+") from dual", (resultSet) -> {
+            org.w3c.dom.Document doc = null;
+            XMLType xml = null;
+
+            try {
+                xml = (XMLType) resultSet.getObject(1);
+                doc = xml.getDocument();
+                String stringFromDocument = Xml.getStringFromDocument(doc);
+                JSONObject jsonReport = XML.toJSONObject(stringFromDocument);
+                ReportXml report = gson.fromJson(jsonReport.toString(), ReportXml.class);
+                toReturn.set(new XmlReport<>(report, jsonReport.toString(), stringFromDocument));
+             } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        });
+        return toReturn.get();
+    }
+
+    public XmlReport<ReportXml> vynosyVozidiel(double percenta){
+        AtomicReference<XmlReport<ReportXml>> toReturn = new AtomicReference<>();
+        SQL.run("select xmlReport_vozidla_vynosy("+percenta+") from dual", (resultSet) -> {
+            org.w3c.dom.Document doc = null;
+            XMLType xml = null;
+
+            try {
+                xml = (XMLType) resultSet.getObject(1);
+                doc = xml.getDocument();
+                String stringFromDocument = Xml.getStringFromDocument(doc);
+                JSONObject jsonReport = XML.toJSONObject(stringFromDocument);
+                ReportXml report = gson.fromJson(jsonReport.toString(), ReportXml.class);
+                toReturn.set(new XmlReport<>(report, jsonReport.toString(), stringFromDocument));
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+        });
+        return toReturn.get();
+    }
+
 
     public int pridajUdrzbu(Vozidlo vozidlo, Udrzba udrzba) {
         String vyraz = "";

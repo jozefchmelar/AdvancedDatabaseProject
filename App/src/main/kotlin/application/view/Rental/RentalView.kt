@@ -1,10 +1,8 @@
-package application.view
+package application.view.Rental
 
 import application.controller.*
 import application.model.RentalModel
-import javafx.geometry.*
 import javafx.scene.control.*
-import javafx.scene.layout.*
 import javafx.util.*
 import tableviewpag
 import tornadofx.*

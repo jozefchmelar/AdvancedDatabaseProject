@@ -1,8 +1,12 @@
 package application.view
 
+import application.view.Customers.*
+import application.view.Invoices.*
+import application.view.Pricing.*
+import application.view.Rental.*
+import application.view.Vehicles.*
 import javafx.scene.control.TabPane
 import javafx.scene.layout.Priority
-import javafx.stage.*
 import tornadofx.* // ktlint-disable
 
 class MainView : View("PDS") {

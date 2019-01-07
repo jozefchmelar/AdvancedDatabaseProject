@@ -42,6 +42,8 @@ final public class SQL {
         }
     }
 
+
+
     public static void run(String query) {
         run(query, null);
     }

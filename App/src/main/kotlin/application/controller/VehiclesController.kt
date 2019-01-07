@@ -1,10 +1,10 @@
 package application.controller
 
 import application.model.*
+import javafx.beans.property.*
 import javafx.scene.chart.*
 import model.*
 import tornadofx.*
-import java.sql.*
 
 class VehiclesController : Controller() {
 
@@ -18,11 +18,19 @@ class VehiclesController : Controller() {
         vehicles.current()
     }
 
-    val pricing  = TableModel { Db.connection.nacitajCenniky("", "", 10, it).map(::PricingModel) }
+    val pricing = TableModel { Db.connection.nacitajCenniky("", "", 10, it).map(::PricingModel) }
 
     val vehicles = TableModel { Db.connection.nacitajVozidla(" ", "", 25, it).map(::VehicleModel) }
-    val vehiclesUsage = TableModel { Db.connection.nacitajVozidla(" ", "vytazenost", 25, it).map(::VehicleModel) }
     val vehiclesFault = TableModel { Db.connection.nacitajVozidla(" ", "poruchovost", 25, it).map(::VehicleModel) }
+
+    val spolahlivostXml = SimpleStringProperty()
+    val spolahlivostTitle = SimpleStringProperty()
+
+    val vynosyXml = SimpleStringProperty()
+    val vynosyTitle = SimpleStringProperty()
+
+    val spolahlivost = Db.connection.spolahlivostVozidiel(0.01).also { spolahlivostXml.set(it.xml);spolahlivostTitle.set(it.report.report.title) }.report.report.vozidlo.map(::XmlVozidloModel).observable()
+    val vynosy = Db.connection.vynosyVozidiel(0.01).also { vynosyXml.set(it.xml);vynosyTitle.set(it.report.report.title) }.report.report.vozidlo.filter { it.zarobok != 0.0 }.map(::XmlVozidloModel).observable()
 
     val vehiclesChart = Db.connection.poctyVozidiel().let {
         listOf(PieChart.Data("Funkcne ${it.funkcne}", it.funkcne.toDouble()),
@@ -34,10 +42,10 @@ class VehiclesController : Controller() {
     init {
         update()
     }
-    fun update(){
+
+    fun update() {
         vehicles.current()
         pricing.current()
-        vehiclesUsage.current()
         vehiclesFault.current()
     }
 }

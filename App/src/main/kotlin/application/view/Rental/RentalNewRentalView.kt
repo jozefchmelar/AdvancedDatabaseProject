@@ -1,9 +1,7 @@
-package application.view
+package application.view.Rental
 
 import application.controller.*
 import application.model.*
-import javafx.beans.property.*
-import javafx.geometry.*
 import tableviewpag
 import tornadofx.*
 import kotlin.math.*

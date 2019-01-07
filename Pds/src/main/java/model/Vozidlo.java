@@ -49,7 +49,7 @@ public class Vozidlo {
         this.datum_vyradenia = datum_vyradenia;
     }
 
-    public int getId() {
+     public int getId() {
         return id;
     }
 
