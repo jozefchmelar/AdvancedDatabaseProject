@@ -2,6 +2,7 @@ package application.controller
 
 import application.model.*
 import javafx.beans.property.*
+import javafx.collections.*
 import javafx.scene.chart.*
 import model.*
 import tornadofx.*
@@ -69,6 +70,15 @@ class VehiclesController : Controller() {
         Db.connection.poctyPreVozidla(from, to, value!!.id.value, value.znacka.value).let {
             znacky.set(it.first)
             autoPocty.set(it.second)
+        }
+    }
+
+    val usages = FXCollections.observableArrayList<UsageModel>()
+
+    fun getMostUsedDays(toDate: Date) {
+        val sdf = SimpleDateFormat("yyyy")
+        Db.connection.vytazeneDniVRoku(sdf.format(toDate)).map(::UsageModel).let {
+            usages.setAll(it)
         }
     }
 }

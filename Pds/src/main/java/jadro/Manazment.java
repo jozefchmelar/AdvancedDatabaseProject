@@ -19,6 +19,7 @@ import java.io.FileNotFoundException;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -640,6 +641,23 @@ public class Manazment {
 
         });
         return p.get();
+    }
+
+    public ArrayList<Pair<LocalDate, Integer>> vytazeneDniVRoku(@NotNull String format) {
+
+        String query = "    select id as dayNumber, selectVytazenostDen(id,'" + format + "') as vy from vozidlo where id < 366 order by vy desc";
+        ArrayList<Pair<LocalDate, Integer>> v = new ArrayList<>();
+        SQL.run(query, (row) -> {
+            try {
+                while (row.next()) {
+                    LocalDate localDate = LocalDate.ofYearDay(Integer.parseInt(format), row.getInt(1));
+                    v.add(new Pair<LocalDate, Integer>(localDate,row.getInt(2)));
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        });
+        return v;
     }
 }
 

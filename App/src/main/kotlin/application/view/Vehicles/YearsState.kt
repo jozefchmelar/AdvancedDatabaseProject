@@ -1,29 +1,44 @@
 package application.view.Vehicles
 
+import application.controller.*
+import application.model.*
+import application.view.Rental.*
 import javafx.scene.*
 import tornadofx.*
 import java.time.*
 
 class YearsState : View("Year"){
-    val year = LocalDate.now().toProperty()
+    private val controller: VehiclesController by inject()
+
+    val year = LocalDate.of(2015,1,1).toProperty()
+
     override val root = borderpane{
         left{
-            vbox{
-                form {
-                    fieldset {
-                        field("Rok") {
-                            datepicker(year)
+            hbox {
+                vbox {
+                    form {
+                        fieldset {
+                            field("Rok") {
+                                datepicker(year)
+                            }
                         }
-
-                    }
-                    button("Show"){
-                        action{
-                            //    select id as dayNumber, selectVytazenostDen(id,'2015') as vy from vozidlo where id < 366 order by vy desc;
+                        button("Show") {
+                            action {
+                                controller.getMostUsedDays(year.value.toDate())
+                            }
                         }
                     }
                 }
             }
-            textfield {  }
+        }
+
+        center{
+            tableview(controller.usages){
+                column("Datum",UsageModel::date){
+                    converter(Conv{ "${it.dayOfMonth}.${it.monthValue}.${it.year}"})
+                }
+                column("Pocet aut",UsageModel::usage)
+            }
         }
     }
 
